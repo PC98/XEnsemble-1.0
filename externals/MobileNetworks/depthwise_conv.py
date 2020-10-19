@@ -15,7 +15,7 @@ from keras.engine import InputSpec
 from keras.utils import conv_utils
 from keras.legacy.interfaces import conv2d_args_preprocessor, generate_legacy_interface
 from keras.layers import Conv2D
-from keras.backend.tensorflow_backend import _preprocess_padding, _preprocess_conv2d_input, _postprocess_conv2d_output
+from keras_contrib.backend.tensorflow_backend import _preprocess_padding, _preprocess_conv2d_input, _postprocess_conv2d_output
 
 import tensorflow as tf
 
