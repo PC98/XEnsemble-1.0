@@ -12,7 +12,6 @@ import random
 import keras
 import numpy as np
 import tensorflow as tf
-from tensorflow.python.platform import app
 from tensorflow.python.platform import flags
 
 FLAGS = flags.FLAGS
@@ -167,11 +166,10 @@ def main(argv=None):
     from utils.squeeze import reduce_precision_py
 
     attack_string_hash = hashlib.sha1(FLAGS.attacks.encode('utf-8')).hexdigest()[:5]
-    sample_string_hash = task['test_set_selected_idx_hash'][:5]
 
-    from datasets.datasets_utils import get_next_class, get_most_class, get_least_likely_class
+    from datasets.datasets_utils import get_next_class, get_most_likely_class, get_least_likely_class
     Y_test_target_next = get_next_class(Y_test)
-    Y_test_target_most = get_most_class(Y_test)
+    Y_test_target_most = get_most_likely_class(Y_test)
     Y_test_target_ll = get_least_likely_class(Y_pred)
 
     X_test_adv_list = []
@@ -247,7 +245,7 @@ def main(argv=None):
         # All data should be discretized to uint8.
         X_test_adv_discret = reduce_precision_py(X_test_adv, 256)
         X_test_adv_discretized_list.append(X_test_adv_discret)
-        Y_test_adv_discret_pred = model1.predict(X_test_adv_discret)
+        Y_test_adv_discret_pred = model.predict(X_test_adv_discret)
         Y_test_adv_discretized_pred_list.append(Y_test_adv_discret_pred)
 
         rec = evaluate_adversarial_examples(X_test, Y_test, X_test_adv_discret, Y_test_target.copy(), targeted, Y_test_adv_discret_pred)

@@ -171,7 +171,6 @@ def evaluate_adversarial_examples(X_test, Y_test, X_test_adv, Y_test_target, tar
 def calculate_msqueezer_accuracy(Y_pred, Y_label):
     alert_good=0
     alert_bad=0
-    weight_count_good=0
 
 
     # if Y_pred_list==[]:
