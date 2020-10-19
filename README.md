@@ -11,21 +11,14 @@ The code package has the following portals:
 
 XEnsemble now supports four datasets: MNIST, CIFAR-10, ImageNet and LFW.
 
-## How to run 
-1. python>=3.6, 
-ensorflow-gpu==1.14.0,
-keras==2.2.4,
-numpy==1.13.3,
-matplotlib,
-h5py,
-pillow,
-scikit-learn,
-click,
-future,
-opencv-python,
-tinydb
+## Installation
+***Note**: This code has been tested on Python 3.7.6*
+1. Create a virtual environment and actiave it.
+2. Clone this repo, and install dependencies: `pip install -r requirements.txt`.
+3. Install [keras-contrib](https://github.com/keras-team/keras-contrib#install-keras_contrib-for-keras-teamkeras).
 
-2. main_attack_portal.py: please read the ppt file for more details of attacks.
+## How to run 
+1. main_attack_portal.py: please read the ppt file for more details of attacks.
 
 ```
 python main_attack_portal.py --dataset_name MNIST --model_name CNN1 --attacks
@@ -47,16 +40,16 @@ jsma?targeted=most;
 jsma?targeted=next;
 jsma?targeted=ll;"
 ```
-3. input_denoising_portal.py: please read the ppt file for more details of the available input denoising method.
+2. input_denoising_portal.py: please read the ppt file for more details of the available input denoising method.
 ```
 python input_denoising_portal.py --dataset_name MNIST --model_name CNN1 --attacks "fgsm?eps=0.3" --input_verifier "bit_depth_1;median_filter_2_2;rotation_-6"
 ```
-4. cross_layer_defense.py:please read the ppt file for more details of available choice of models. More diversity ensemble details can be found in the paper.
+3. cross_layer_defense.py:please read the ppt file for more details of available choice of models. More diversity ensemble details can be found in the paper.
 ```
 python cross_layer_defense.py --dataset_name MNIST --model_name cnn1 --attacks "fgsm?eps=0.3" --input_verifier "bit_depth_1;median_filter_2_2;rotation_-6" --output_verifier "cnn2;cnn1_half;cnn1_double;cnn1_30;cnn1_40"
 ```
 
-5. detection_only_comparison.py: please read feature squeezing, MagNet, and LID papers for implementation details.
+4. detection_only_comparison.py: please read feature squeezing, MagNet, and LID papers for implementation details.
 ```
 python detection_only_comparison.py --dataset_name MNIST --model_name CNN1 --attacks "fgsm?eps=0.3;bim?eps=0.3&eps_iter=0.06;carlinili?targeted=next&batch_size=1&max_iterations=1000&confidence=10;carlinili?targeted=ll&batch_size=1&max_iterations=1000&confidence=10;carlinil2?targeted=next&batch_size=100&max_iterations=1000&confidence=10;carlinil2?targeted=ll&batch_size=100&max_iterations=1000&confidence=10;carlinil0?targeted=next&batch_size=1&max_iterations=1000&confidence=10;carlinil0?targeted=ll&batch_size=1&max_iterations=1000&confidence=10;jsma?targeted=next;jsma?targeted=ll;" --detection "FeatureSqueezing?squeezers=bit_depth_1&distance_measure=l1&fpr=0.05;FeatureSqueezing?squeezers=bit_depth_2&distance_measure=l1&fpr=0.05;FeatureSqueezing?squeezers=bit_depth_1,median_filter_2_2&distance_measure=l1&fpr=0.05;MagNet"
 ```
