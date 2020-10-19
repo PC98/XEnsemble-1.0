@@ -15,7 +15,6 @@ isort==5.6.4
 joblib==0.17.0
 Keras==2.2.4
 Keras-Applications==1.0.8
-keras-contrib==2.0.8
 Keras-Preprocessing==1.1.2
 kiwisolver==1.2.0
 lazy-object-proxy==1.4.3

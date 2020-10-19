@@ -15,7 +15,7 @@ XEnsemble now supports four datasets: MNIST, CIFAR-10, ImageNet and LFW.
 ***Note**: This code has been tested on Python 3.7.6*
 1. Create a virtual environment and actiave it.
 2. Clone this repo, and install dependencies: `pip install -r requirements.txt`.
-3. Install [keras-contrib](https://github.com/keras-team/keras-contrib#install-keras_contrib-for-keras-teamkeras).
+3. Install `keras-contrib`: `pip install git+https://www.github.com/keras-team/keras-contrib.git`.
 
 ## How to run 
 1. main_attack_portal.py: please read the ppt file for more details of attacks.
