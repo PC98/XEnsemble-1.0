@@ -1,6 +1,6 @@
 ## Introduction
 
-XEnsemble is an advanced robust deep learning package that can defend both adversarial examples and out-of-distribution input(to-be-updated). The intuition behind is the input and model divergence of these attack inputs[1,5].
+XEnsemble is an advanced robust deep learning package that can defend both adversarial examples and out-of-distribution input(to-be-updated). The intuition behind is the input and model divergence of these attack inputs [1,5].
 
 <!--
 The code package has the following portals:
@@ -14,9 +14,9 @@ XEnsemble now supports four datasets: MNIST, CIFAR-10, ImageNet and LFW.
 
 ## Installation
 
-**\*Note**: This code has been tested on Python 3.7.6\*
+**Note**: This code has been tested on Python 3.7.6
 
-1. Create a virtual environment and actiave it.
+1. Create a virtual environment and activate it.
 2. Clone this repo, and install dependencies: `pip install -r requirements.txt`.
 3. Install `keras-contrib`: `pip install git+https://www.github.com/keras-team/keras-contrib.git`.
 
@@ -112,6 +112,6 @@ We have another two papers under review.
 [6]Wenqi Wei, and Ling Liu, "Robust Deep Learning Ensemble against Deception", under the submission of IEEE Transaction on Dependable and Secure Computing.
 ```
 
-## Special Acknowledgement
+## Special Acknowledgment
 
-The code package is built on top of the EvadeML. We specially thank the authors. We also thank authors in Cleverhans, Carlini&Wagner attacks, PGD attacks, MagNet, universal(and DeepFool) attacks, keras models and those impletmented neural network models with trained weights.
+The code package is built on top of the EvadeML. We specially thank the authors. We also thank authors in Cleverhans, Carlini&Wagner attacks, PGD attacks, MagNet, universal (and DeepFool) attacks, keras models and those implemented neural network models with trained weights.

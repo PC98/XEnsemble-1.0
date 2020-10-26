@@ -1,12 +1,10 @@
 from future.standard_library import install_aliases
 install_aliases()
-from urllib import parse as urlparse
 
 import pickle
 import numpy as np
 import os
 import time
-
 
 
 from .cleverhans_wrapper import generate_fgsm_examples, generate_jsma_examples, generate_bim_examples
@@ -20,7 +18,7 @@ from .pgd.pgd_wrapper import generate_pgdli_examples
 def maybe_generate_adv_examples(sess, model, x, y, X, Y, attack_name, attack_params, use_cache=False, verbose=True, attack_log_fpath=None):
     x_adv_fpath = use_cache
     if use_cache and os.path.isfile(x_adv_fpath):
-        print ("Loading adversarial examples from [%s]." % os.path.basename(x_adv_fpath))
+        print("Loading adversarial examples from [%s]." % os.path.basename(x_adv_fpath))
         X_adv, duration = pickle.load(open(x_adv_fpath, "rb"))
     else:
         time_start = time.time()
@@ -70,26 +68,21 @@ def generate_adv_examples(sess, model, x, y, X, Y, attack_name, attack_params, v
     return X_adv
 
 
-
-
-
 # TODO: replace pickle with .h5 for Python 2/3 compatibility issue.
 def load_attack_input(dataset_name, attack_name):
-    if attack_name.split('?')[0] in ['fgsm','bim','carlinili','deepfool','carlinil2','carlinil0','jsma','pgdli']:
+    if attack_name.split('?')[0] in ['fgsm', 'bim', 'carlinili', 'deepfool', 'carlinil2', 'carlinil0', 'jsma', 'pgdli']:
 
-        print ("Loading adversarial examples from [%s]." % os.path.basename(attack_name))
+        print("Loading adversarial examples from [%s]." % os.path.basename(attack_name))
 
         if dataset_name == 'MNIST':
             attack_folder = './results/MNIST_100_1d1b8_carlini/adv_examples/'
 
-
-            x_adv_fname="%s_%s.pickle" % ('MNIST_100_1d1b8_carlini', attack_name)
+            x_adv_fname = "%s_%s.pickle" % ('MNIST_100_1d1b8_carlini', attack_name)
             x_adv_fpath = os.path.join(attack_folder, x_adv_fname)
-
 
         if dataset_name == 'CIFAR-10':
             attack_folder = './results/CIFAR-10_100_de671_densenet/adv_examples/'
-            x_adv_fname="%s_%s.pickle" % ('CIFAR-10_100_de671_densenet', attack_name)
+            x_adv_fname ="%s_%s.pickle" % ('CIFAR-10_100_de671_densenet', attack_name)
             x_adv_fpath = os.path.join(attack_folder, x_adv_fname)
 
         if dataset_name == 'ImageNet':
@@ -102,8 +95,7 @@ def load_attack_input(dataset_name, attack_name):
             x_adv_fname = "%s_%s.pickle" % ('LFW_100_57af0_carlini', attack_name)
             x_adv_fpath = os.path.join(attack_folder, x_adv_fname)
 
-
-        X_attack,_ = pickle.load(open(x_adv_fpath, "rb"),encoding='bytes')
+        X_attack, _ = pickle.load(open(x_adv_fpath, "rb"), encoding='bytes')
 
     elif attack_name == 'ood':
 
@@ -111,7 +103,7 @@ def load_attack_input(dataset_name, attack_name):
             ood = []
             import cv2
             ood_dir = './datasets/Imagenet_resize/Imagenet_resize/'
-            #ood_dir = './datasets/LSUN_resize/LSUN_resize/'
+            # ood_dir = './datasets/LSUN_resize/LSUN_resize/'
             for file in os.listdir(ood_dir):
                 ood.append(cv2.resize(cv2.imread(os.path.join(ood_dir, file)), (32, 32)))
 
@@ -119,10 +111,9 @@ def load_attack_input(dataset_name, attack_name):
             X_attack = ood / 255.0
 
         else:
-            raise NotImplementedError('Prediction model on dataset %s is unsupported. Only CIFAR-10 as in-distribtion dataset is supported.' % attack_name)
-
+            raise NotImplementedError('Prediction model on dataset %s is unsupported. Only CIFAR-10 as in-distribution dataset is supported.' % attack_name)
 
     else:
-        raise NotImplementedError('Unsupported attack method or attack results not saved: %s'%attack_name)
+        raise NotImplementedError('Unsupported attack method or attack results not saved: %s' % attack_name)
 
     return X_attack
