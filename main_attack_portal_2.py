@@ -163,8 +163,11 @@ def main(argv=None):
     task['accuracy_test_selected'] = accuracy_selected
     task['mean_confidence_test_selected'] = mean_conf_selected
 
-    task_id = "%s_%d_%s_%s" % \
-        (task['dataset_name'], task['test_set_selected_length'], task['test_set_selected_idx_hash'][:5], task['model_name'])
+    #task_id = "%s_%d_%s_%s" % \
+     #   (task['dataset_name'], task['test_set_selected_length'], task['test_set_selected_idx_hash'][:5], task['model_name'])
+
+    task_id = "%s_%s" % \
+           (task['dataset_name'], task['model_name'])
 
     FLAGS.result_folder = os.path.join(FLAGS.result_folder, task_id)
     if not os.path.isdir(FLAGS.result_folder):
@@ -177,7 +180,8 @@ def main(argv=None):
     from attacks import maybe_generate_adv_examples
     from utils.squeeze import reduce_precision_py
 
-    attack_string_hash = hashlib.sha1(FLAGS.attacks.encode('utf-8')).hexdigest()[:5]
+    #attack_string_hash = hashlib.sha1(FLAGS.attacks.encode('utf-8')).hexdigest()[:5]
+    attack_string_hash = FLAGS.attacks.encode('utf-8')
 
     from datasets.datasets_utils import get_next_class, get_most_likely_class, get_least_likely_class
     Y_test_target_next = get_next_class(Y_test)
@@ -281,7 +285,7 @@ def main(argv=None):
     write_to_csv(to_csv, attacks_evaluation_csv_fpath, fieldnames)
 
     if FLAGS.visualize is True:
-        from datasets.visualization import show_imgs_in_rows
+        from datasets.visualization import show_imgs_in_rows2
         if FLAGS.test_mode or FLAGS.balance_sampling:
             selected_idx_vis = range(Y_test.shape[1])
         else:
@@ -293,9 +297,23 @@ def main(argv=None):
         rows += map(lambda x: x[selected_idx_vis], X_test_adv_list)
 
         img_fpath = os.path.join(FLAGS.result_folder, '%s_attacks_%s_examples.png' % (task_id, attack_string_hash))
-        show_imgs_in_rows(rows, img_fpath)
+        show_imgs_in_rows2(rows, img_fpath)
         print('\n===Adversarial image examples are saved in ', img_fpath)
         print(Y_test_adv_discretized_pred_list)
+
+        """rows = [legitimate_examples]
+        rows2 = map(lambda x: x[selected_idx_vis], X_test_adv_list)
+
+        img_fpath = os.path.join(FLAGS.result_folder, '%s_attacks_%s_example_original.png' % (task_id, attack_string_hash))
+        show_imgs_in_rows(rows, img_fpath)
+        print('\n===Adversarial image examples are saved in ', img_fpath)
+        #print(Y_test_adv_discretized_pred_list)
+
+        img_fpath = os.path.join(FLAGS.result_folder,
+                                 '%s_attacks_%s_example_adversarial.png' % (task_id, attack_string_hash))
+        show_imgs_in_rows(rows2, img_fpath)
+        print('\n===Adversarial image examples are saved in ', img_fpath)"""
+        #print(Y_test_adv_discretized_pred_list)
 
         # TODO: output the prediction and confidence for each example, both legitimate and adversarial
 
