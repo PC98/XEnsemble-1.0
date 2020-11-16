@@ -35,7 +35,24 @@ def get_first_n_examples_id_each_class(Y_test, n=1):
         loc = np.where(Y_test_labels == i)[0]
         if len(loc) > 0:
             selected_idx.append(list(loc[:n]))
+    selected_idx = reduce(lambda x, y: x + y, zip(*selected_idx))
 
+    return np.array(selected_idx)
+
+def get_first_n_examples_id_each_class_random(Y_test, n=1):
+    """
+    Only return the classes with samples.
+    """
+
+    num_classes = Y_test.shape[1]
+    Y_test_labels = np.argmax(Y_test, axis=1)
+
+    selected_idx = []
+    for i in range(num_classes):
+        loc = np.where(Y_test_labels == i)[0]
+        loc = np.random.shuffle(list(loc))
+        if len(loc) > 0:
+            selected_idx.append(loc[:n])
     selected_idx = reduce(lambda x, y: x + y, zip(*selected_idx))
 
     return np.array(selected_idx)

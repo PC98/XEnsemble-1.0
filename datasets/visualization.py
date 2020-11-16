@@ -77,6 +77,7 @@ def show_imgs_in_rows2(rows, fpath=None):
         #y_offset += img_height + y_margin
 
         if fpath is not None:
+            new_im = new_im.resize(size=(img_width*3, img_height*3))
             new_im.save(fpath.split('.')[0] + str(i) + ".png")
             i +=1
     # new_im.show()
