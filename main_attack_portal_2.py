@@ -26,6 +26,7 @@ flags.DEFINE_string('model_name', 'cleverhans', 'Supported: cleverhans, cleverha
 
 flags.DEFINE_boolean('select', True, 'Select correctly classified examples for the experiment.')
 flags.DEFINE_integer('nb_examples', 1, 'The number of examples selected for attacks.')
+flags.DEFINE_integer('label_index', 0, 'The index of desired label in dataset.')
 flags.DEFINE_boolean('balance_sampling', False, 'Select the same number of examples for each class.')
 flags.DEFINE_boolean('test_mode', False, 'Only select one sample for each class.')
 
@@ -82,7 +83,8 @@ def main(argv=None):
     #z = np.where(Y_test_all == np.asarray([1, 0, 0, 0, 0, 0, 0, 0, 0, 0]))
 
     #LABEL SELECTION
-    label = np.asarray([0, 1, 0, 0, 0, 0, 0, 0, 0, 0])
+    label = np.asarray([0] * Y_test_all.shape[1])
+    label[FLAGS.label_index] = 1
     filter_indices = []
     for i in range(len(Y_test_all)):
         if np.array_equal(Y_test_all[i], label):
@@ -130,6 +132,7 @@ def main(argv=None):
         else:
             if not FLAGS.balance_sampling:
                 # TODO: Possibly randomize this
+                np.random.shuffle(correct_idx)
                 selected_idx = correct_idx[:FLAGS.nb_examples]
             else:
                 # select the same number of examples for each class label.
@@ -173,8 +176,8 @@ def main(argv=None):
     if not os.path.isdir(FLAGS.result_folder):
         os.makedirs(FLAGS.result_folder)
 
-    from utils.output import save_task_descriptor
-    save_task_descriptor(FLAGS.result_folder, [task])
+    from utils.output import save_task_descriptor2
+    save_task_descriptor2(FLAGS.result_folder, [task])
 
     # 5. Generate adversarial examples.
     from attacks import maybe_generate_adv_examples
@@ -290,6 +293,7 @@ def main(argv=None):
             selected_idx_vis = range(Y_test.shape[1])
         else:
             selected_idx_vis = get_first_n_examples_id_each_class(Y_test, 1)
+            #selected_idx_vis = selected_idx
 
         legitimate_examples = X_test[selected_idx_vis]
 
