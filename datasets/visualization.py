@@ -56,11 +56,11 @@ def show_imgs_in_rows2(rows, fpath=None):
 
     # pdb.set_trace()
 
-    #total_width = width_num * img_width + (width_num - 1) * x_margin
-    #total_height = height_num * img_height + (height_num - 1) * y_margin
+    total_width = width_num * img_width + (width_num - 1) * x_margin
+    total_height = height_num * img_height + (height_num - 1) * y_margin
 
-    total_width = img_width
-    total_height = img_height
+    #total_width = img_width
+    #total_height = img_height
 
     #new_im = Image.new('RGB', (total_width, total_height), (255, 255, 255))
 
