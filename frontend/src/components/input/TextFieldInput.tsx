@@ -4,8 +4,8 @@ import TextField from "@material-ui/core/TextField";
 
 const useStyles = makeStyles({
   container: {
-    marginTop: 12,
-    marginBottom: 12,
+    marginTop: 8,
+    marginBottom: 8,
   },
   formHelperTextRoot: {
     marginLeft: 2,

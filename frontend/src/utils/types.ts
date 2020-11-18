@@ -57,10 +57,7 @@ export const DATA: Record<DATASET, { models: MODEL[]; labels: string[] }> = {
   },
   "CIFAR-10": {
     models: [
-      "CNN-2",
       "CNN-1",
-      "CNN-2 Adv. Trained",
-      "DenseNet",
       "LeNet",
       "ResNet-20",
       "ResNet-32",
@@ -84,6 +81,6 @@ export const DATA: Record<DATASET, { models: MODEL[]; labels: string[] }> = {
   },
   ImageNet: {
     models: ["ResNet-50", "VGG-19", "VGG-16", "Inception v3", "MobileNet"],
-    labels: imagenetLabels,
+    labels: imagenetLabels.map((label, index) => `${label} (${index})`),
   },
 };

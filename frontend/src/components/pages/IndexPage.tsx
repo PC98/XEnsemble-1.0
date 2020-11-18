@@ -31,12 +31,15 @@ const IndexPage: React.FC<Props> = ({ serverResponseCallback }) => {
       // Use labels from InputForm.tsx
       const labelStr = data.get("Label") as string;
       const modelStr = data.get("Model") as string;
+      const randomVal = data.get("Random") as string | null;
 
       data.set("Label", String(DATA[tabValue].labels.indexOf(labelStr))); // To make things easier for the back-end
       // @ts-ignore
       data.set("Model", MODEL_OBJ[modelStr]);
       data.set("Dataset", tabValue);
+      data.set("Random", String(randomVal == null ? 0 : 1));
 
+      // TODO: Check if success parameter in server response is false.
       serverResponseCallback(await makeRequest(data));
     },
     [makeRequest, serverResponseCallback, tabValue]

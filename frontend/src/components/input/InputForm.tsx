@@ -4,6 +4,7 @@ import CircularProgress from "@material-ui/core/CircularProgress";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import DropdownInput from "./DropdownInput";
 import TextFieldInput from "./TextFieldInput";
+import BooleanInput from "./BooleanInput";
 
 interface Props {
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
@@ -25,12 +26,12 @@ const useStyles = makeStyles({
     minWidth: 280,
     flexDirection: "column",
     justifyContent: "center",
-    marginTop: -12,
-    marginBottom: -12,
+    marginTop: -8,
+    marginBottom: -8,
   },
   button: {
-    marginTop: 12,
-    marginBottom: 12,
+    marginTop: 8,
+    marginBottom: 8,
   },
   spinner: {
     padding: 4,
@@ -52,9 +53,10 @@ const InputForm = forwardRef<HTMLFormElement, Props>(
           />
           <DropdownInput
             label="Label"
-            helperText="Class label of the random image to attack."
+            helperText="Class label of the image to attack."
             options={labels}
           />
+          <BooleanInput label="Random" helperText="Select image randomly" />
           <TextFieldInput
             label="Attack"
             helperText="Attack string, with parameters. Specify exactly one."
