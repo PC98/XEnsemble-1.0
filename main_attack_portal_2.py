@@ -303,7 +303,7 @@ def main(argv=None):
         rows += map(lambda x: x[selected_idx_vis], X_test_adv_list)
 
         img_fpath = os.path.join(FLAGS.result_folder, '%s_attacks_%s_examples.png' % (task_id, attack_string_hash))
-        show_imgs_in_rows2(rows, img_fpath)
+        show_imgs_in_rows2(rows, dataset.num_channels, img_fpath)
         print('\n===Adversarial image examples are saved in ', img_fpath)
         print(Y_test_adv_discretized_pred_list)
 
