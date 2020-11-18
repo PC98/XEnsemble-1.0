@@ -35,6 +35,9 @@ export const MODEL_OBJ = {
 } as const;
 type MODEL = keyof typeof MODEL_OBJ;
 
+const addIndicesToLabels = (labels: string[]) =>
+  labels.map((label, index) => `${label} (${index})`);
+
 export const DATA: Record<DATASET, { models: MODEL[]; labels: string[] }> = {
   MNIST: {
     models: [
@@ -66,21 +69,21 @@ export const DATA: Record<DATASET, { models: MODEL[]; labels: string[] }> = {
       "ResNet-110",
       "Distillation",
     ],
-    labels: [
-      "Airplane (0)",
-      "Automobile (1)",
-      "Bird (2)",
-      "Cat (3)",
-      "Deer (4)",
-      "Dog (5)",
-      "Frog (6)",
-      "Horse (7)",
-      "Ship (8)",
-      "Truck (9)",
-    ],
+    labels: addIndicesToLabels([
+      "Airplane",
+      "Automobile",
+      "Bird",
+      "Cat",
+      "Deer",
+      "Dog",
+      "Frog",
+      "Horse",
+      "Ship",
+      "Truck",
+    ]),
   },
   ImageNet: {
     models: ["ResNet-50", "VGG-19", "VGG-16", "Inception v3", "MobileNet"],
-    labels: imagenetLabels.map((label, index) => `${label} (${index})`),
+    labels: addIndicesToLabels(imagenetLabels),
   },
 };

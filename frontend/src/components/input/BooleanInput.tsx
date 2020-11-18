@@ -21,7 +21,7 @@ const BooleanInput: React.FC<Props> = ({ label, helperText }) => {
   return (
     <FormControlLabel
       classes={{ root: container }}
-      control={<Switch defaultChecked name={label as string} color="primary" />}
+      control={<Switch defaultChecked name={label} color="primary" />}
       label={helperText}
     />
   );
