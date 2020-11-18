@@ -76,12 +76,12 @@ def show_imgs_in_rows2(rows, fpath=None):
             img = Image.fromarray((np.squeeze(img_array) * 255).astype(np.uint8))
             new_im.paste(img, (x_offset, y_offset))
             #x_offset += img_width + x_margin
-
         x_offset = 0
         #y_offset += img_height + y_margin
         if prev_im:
             difference = ImageChops.difference(prev_im, new_im)
-            difference = ImageChops.invert(difference)
+            if imgs.size > 784:
+                difference = ImageChops.invert(difference)
             difference = difference.resize(size=(img_width * 3, img_height * 3))
             difference.save(fpath.split('.')[0] + str(i + 1) + ".png")
         prev_im = new_im
