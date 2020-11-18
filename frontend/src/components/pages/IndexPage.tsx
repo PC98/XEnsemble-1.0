@@ -28,10 +28,13 @@ const IndexPage: React.FC<Props> = ({ serverResponseCallback }) => {
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       const data = new FormData(formRef.current ?? undefined);
+      // To make things easier for the back-end. Use "Label" from InputForm.tsx
+      const labelStr = data.get("Label") as string;
+      data.set("Label", String(DATA[tabValue].labels.indexOf(labelStr)));
 
       serverResponseCallback(await makeRequest(data));
     },
-    [makeRequest, serverResponseCallback]
+    [makeRequest, serverResponseCallback, tabValue]
   );
 
   return (
@@ -40,6 +43,7 @@ const IndexPage: React.FC<Props> = ({ serverResponseCallback }) => {
         labels={Object.keys(DATA)}
         value={tabValue}
         onChangeValue={(newValue) => void setTabValue(newValue as DATASET)}
+        isLoading={isLoading}
       />
       <InputForm
         ref={formRef}

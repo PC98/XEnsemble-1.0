@@ -3,12 +3,13 @@ import Button from "@material-ui/core/Button";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import DropdownInput from "./DropdownInput";
+import TextFieldInput from "./TextFieldInput";
 
 interface Props {
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   isLoading: boolean;
   models: string[];
-  labels: string[] | Promise<string[]>;
+  labels: string[];
 }
 
 const useStyles = makeStyles({
@@ -31,14 +32,14 @@ const useStyles = makeStyles({
     marginTop: 12,
     marginBottom: 12,
   },
-  rightMargin: {
-    marginRight: 8,
+  spinner: {
+    padding: 4,
   },
 });
 
 const InputForm = forwardRef<HTMLFormElement, Props>(
   ({ onSubmit, isLoading, models, labels }, ref) => {
-    const { container, form, button, rightMargin } = useStyles();
+    const { container, form, button, spinner } = useStyles();
 
     return (
       <div className={container}>
@@ -47,12 +48,17 @@ const InputForm = forwardRef<HTMLFormElement, Props>(
             label="Model"
             helperText="Trained model on which the attack will run."
             options={models}
-            shoulSortOptions
+            shouldSortOptions
           />
           <DropdownInput
             label="Label"
             helperText="Class label of the random image to attack."
             options={labels}
+          />
+          <TextFieldInput
+            label="Attack"
+            helperText="Attack string, with parameters. Specify exactly one."
+            inputProps={{ pattern: "[^;]*;?[^;]*$" }} // Regex such that only at-most one semi-colon is allowed.
           />
           <Button
             className={button}
@@ -61,14 +67,11 @@ const InputForm = forwardRef<HTMLFormElement, Props>(
             color="primary"
             disabled={isLoading}
           >
-            {isLoading && (
-              <CircularProgress
-                className={rightMargin}
-                color="inherit"
-                size={16}
-              />
+            {isLoading ? (
+              <CircularProgress className={spinner} color="inherit" size={16} />
+            ) : (
+              "Submit"
             )}
-            Submit
           </Button>
         </form>
       </div>

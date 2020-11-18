@@ -1,3 +1,4 @@
+import imagenetLabels from "./ImageNetLabels";
 export interface ServerResponse {
   success: boolean;
 }
@@ -34,10 +35,7 @@ const MODEL_OBJ = {
 } as const;
 type MODEL = keyof typeof MODEL_OBJ;
 
-export const DATA: Record<
-  DATASET,
-  { models: MODEL[]; labels: Promise<string[]> | string[] }
-> = {
+export const DATA: Record<DATASET, { models: MODEL[]; labels: string[] }> = {
   MNIST: {
     models: [
       "CNN-2",
@@ -86,10 +84,6 @@ export const DATA: Record<
   },
   ImageNet: {
     models: ["ResNet-50", "VGG-19", "VGG-16", "Inception v3", "MobileNet"],
-    labels: (async () => {
-      const file = await fetch("/ImageNetLabels.txt");
-      const text = await file.text();
-      return text.split("\n").map((label, index) => `${label} (${index})`);
-    })(),
+    labels: imagenetLabels,
   },
 };

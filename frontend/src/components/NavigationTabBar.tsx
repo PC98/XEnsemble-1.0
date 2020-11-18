@@ -7,12 +7,14 @@ interface Props {
   labels: string[];
   value: string;
   onChangeValue: (newValue: string) => void;
+  isLoading: boolean;
 }
 
 const NavigationTabBar: React.FC<Props> = ({
   labels,
   value,
   onChangeValue,
+  isLoading,
 }) => {
   return (
     <Paper>
@@ -26,7 +28,12 @@ const NavigationTabBar: React.FC<Props> = ({
         centered
       >
         {labels.map((label) => (
-          <Tab label={label} key={label} value={label} />
+          <Tab
+            label={label}
+            key={label}
+            value={label}
+            disabled={isLoading && label !== value}
+          />
         ))}
       </Tabs>
     </Paper>
