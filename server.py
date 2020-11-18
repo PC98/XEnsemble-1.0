@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 import subprocess
 
 app = Flask(__name__)
@@ -6,10 +6,12 @@ app = Flask(__name__)
 
 @app.route('/api/form', methods=['POST'])
 def api_form():
-    rc = subprocess.run(['python', 'main_attack_portal.py', "--dataset_name", "CIFAR-10", "--model_name", "CNN1",
-                         "--nb_examples=1", "--attacks", "fgsm?eps=0.3;"], stdout=subprocess.DEVNULL)
+    form_input = request.form.to_dict()
+    rc = subprocess.run(['python', 'main_attack_portal_2.py', "--dataset_name", form_input['Dataset'],
+                         f"--label_index={form_input['Label']}", "--model_name", form_input['Model'],
+                         "--nb_examples=1", "--attacks", form_input["Attack"]])  # To hide output, add stdout=subprocess.DEVNULL
 
-    return {'success': True if rc.returncode == 0 else False}
+    return {'success': rc.returncode == 0}
 
 
 if __name__ == '__main__':
