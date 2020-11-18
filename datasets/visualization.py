@@ -1,4 +1,4 @@
-from PIL import Image
+from PIL import Image, ImageChops
 import numpy as np
 import pdb
 
@@ -67,6 +67,7 @@ def show_imgs_in_rows2(rows, fpath=None):
     x_offset = 0
     y_offset = 0
     i = 0
+    prev_im = None
     for imgs in rows:
         new_im = Image.new('RGB', (total_width, int(total_height/2)), (255, 255, 255))
         imgs_row = list(imgs)
@@ -78,7 +79,11 @@ def show_imgs_in_rows2(rows, fpath=None):
 
         x_offset = 0
         #y_offset += img_height + y_margin
-
+        if prev_im:
+            difference = ImageChops.difference(prev_im, new_im)
+            difference = difference.resize(size=(img_width * 3, img_height * 3))
+            difference.save(fpath.split('.')[0] + str(i + 1) + ".png")
+        prev_im = new_im
         if fpath is not None:
             new_im = new_im.resize(size=(img_width*3, img_height*3))
             new_im.save(fpath.split('.')[0] + str(i) + ".png")
