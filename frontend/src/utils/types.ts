@@ -5,7 +5,7 @@ export interface ServerResponse {
 
 export type DATASET = "MNIST" | "CIFAR-10" | "ImageNet";
 
-const MODEL_OBJ = {
+export const MODEL_OBJ = {
   "CNN-2": "cnn2",
   "CNN-1": "cnn1",
   "CNN-2 Adv. Trained": "cnn2_adv_trained",

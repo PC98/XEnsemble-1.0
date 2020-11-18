@@ -12,7 +12,7 @@ const MainComponent: React.FC = () => {
   );
 
   const serverResponseCallback = useCallback(
-    async (response: ServerResponse | null) => {
+    (response: ServerResponse | null) => {
       setServerResponse(response);
       history.push("/result");
     },

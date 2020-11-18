@@ -3,7 +3,7 @@ import InputForm from "../input/InputForm";
 import NavigationTabBar from "../NavigationTabBar";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import usePostRequest from "../../utils/usePostRequest";
-import { ServerResponse, DATA, DATASET } from "../../utils/types";
+import { ServerResponse, DATA, DATASET, MODEL_OBJ } from "../../utils/types";
 
 const useStyles = makeStyles({
   container: {
@@ -28,9 +28,14 @@ const IndexPage: React.FC<Props> = ({ serverResponseCallback }) => {
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       const data = new FormData(formRef.current ?? undefined);
-      // To make things easier for the back-end. Use "Label" from InputForm.tsx
+      // Use labels from InputForm.tsx
       const labelStr = data.get("Label") as string;
-      data.set("Label", String(DATA[tabValue].labels.indexOf(labelStr)));
+      const modelStr = data.get("Model") as string;
+
+      data.set("Label", String(DATA[tabValue].labels.indexOf(labelStr))); // To make things easier for the back-end
+      // @ts-ignore
+      data.set("Model", MODEL_OBJ[modelStr]);
+      data.set("Dataset", tabValue);
 
       serverResponseCallback(await makeRequest(data));
     },
