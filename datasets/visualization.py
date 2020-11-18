@@ -44,7 +44,7 @@ def show_imgs_in_rows(rows, fpath=None):
         new_im.save(fpath)
     # new_im.show()
 
-def show_imgs_in_rows2(rows, fpath=None):
+def show_imgs_in_rows2(rows, num_channels, fpath=None):
     # TODO: get the maximum.
     width_num = len(rows[0])
     height_num = len(rows)
@@ -80,7 +80,7 @@ def show_imgs_in_rows2(rows, fpath=None):
         #y_offset += img_height + y_margin
         if prev_im:
             difference = ImageChops.difference(prev_im, new_im)
-            if imgs.size > 784:
+            if num_channels > 1:
                 difference = ImageChops.invert(difference)
             difference = difference.resize(size=(img_width * 3, img_height * 3))
             difference.save(fpath.split('.')[0] + str(i + 1) + ".png")
