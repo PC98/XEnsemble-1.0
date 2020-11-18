@@ -27,6 +27,7 @@ flags.DEFINE_string('model_name', 'cleverhans', 'Supported: cleverhans, cleverha
 flags.DEFINE_boolean('select', True, 'Select correctly classified examples for the experiment.')
 flags.DEFINE_integer('nb_examples', 1, 'The number of examples selected for attacks.')
 flags.DEFINE_integer('label_index', 0, 'The index of desired label in dataset.')
+flags.DEFINE_integer('random_image', 1, '0 if random is off, any integer otherwise')
 flags.DEFINE_boolean('balance_sampling', False, 'Select the same number of examples for each class.')
 flags.DEFINE_boolean('test_mode', False, 'Only select one sample for each class.')
 
@@ -132,7 +133,8 @@ def main(argv=None):
         else:
             if not FLAGS.balance_sampling:
                 # TODO: Possibly randomize this
-                np.random.shuffle(correct_idx)
+                if FLAGS.random_image != 0:
+                    np.random.shuffle(correct_idx)
                 selected_idx = correct_idx[:FLAGS.nb_examples]
             else:
                 # select the same number of examples for each class label.
