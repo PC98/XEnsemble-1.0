@@ -83,10 +83,13 @@ def show_imgs_in_rows2(rows, num_channels, fpath=None):
             if num_channels > 1:
                 difference = ImageChops.invert(difference)
             difference = difference.resize(size=(img_width * 3, img_height * 3))
-            difference.save(fpath.split('.')[0] + str(i + 1) + ".png")
+            difference.save(fpath.split('/')[0] + "/" + fpath.split('/')[1] + "/difference.png")
         prev_im = new_im
         if fpath is not None:
             new_im = new_im.resize(size=(img_width*3, img_height*3))
-            new_im.save(fpath.split('.')[0] + str(i) + ".png")
+            if i == 0:
+                new_im.save(fpath.split('/')[0] + "/" + fpath.split('/')[1] + "/original.png")
+            if i == 1:
+                new_im.save(fpath.split('/')[0] + "/" + fpath.split('/')[1] + "/attacked.png")
             i +=1
     # new_im.show()
