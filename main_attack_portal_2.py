@@ -283,9 +283,7 @@ def main(argv=None):
         to_csv.append(rec)
 
     from utils.output import write_to_csv
-    attacks_evaluation_csv_fpath = os.path.join(FLAGS.result_folder,
-                                                "%s_attacks_%s_evaluation.csv" %
-                                                (task_id, attack_string_hash))
+    attacks_evaluation_csv_fpath = os.path.join(FLAGS.result_folder,"evaluation.csv")
     fieldnames = ['dataset_name', 'model_name', 'attack_string', 'duration_per_sample', 'discretization', 'success_rate', 'mean_confidence', 'mean_l2_dist', 'mean_li_dist', 'mean_l0_dist_value', 'mean_l0_dist_pixel', 'prediction_after_attack']
     write_to_csv(to_csv, attacks_evaluation_csv_fpath, fieldnames)
 
