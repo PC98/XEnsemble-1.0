@@ -54,12 +54,14 @@ const IndexPage: React.FC<Props> = ({
       const labelStr = data.get("Label") as string;
       const modelStr = data.get("Model") as string;
       const randomVal = data.get("Random") as string | null;
+      const attackStr = data.get("Attack") as string;
 
       data.set("Label", String(DATA[tabValue].labels.indexOf(labelStr))); // To make things easier for the back-end
       // @ts-ignore
       data.set("Model", MODEL_OBJ[modelStr]);
       data.set("Dataset", tabValue);
       data.set("Random", String(randomVal == null ? 0 : 1));
+      data.set("Attack", attackStr.trim()); // just in case
 
       serverResponseCallback(await makeRequest(data));
     },
