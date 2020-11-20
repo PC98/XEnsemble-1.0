@@ -277,6 +277,8 @@ def main(argv=None):
         rec['dataset_name'] = FLAGS.dataset_name
         rec['model_name'] = FLAGS.model_name
         rec['attack_string'] = attack_string
+        rec['original_label_index'] = FLAGS.label_index
+        rec['random'] = True if FLAGS.random_image != 0 else False
         rec['duration_per_sample'] = dur_per_sample
         rec['discretization'] = True
         rec['prediction_after_attack'] = np.argmax(Y_test_adv_discret_pred[0])
@@ -284,7 +286,7 @@ def main(argv=None):
 
     from utils.output import write_to_csv
     attacks_evaluation_csv_fpath = os.path.join(FLAGS.result_folder,"evaluation.csv")
-    fieldnames = ['dataset_name', 'model_name', 'attack_string', 'duration_per_sample', 'discretization', 'success_rate', 'mean_confidence', 'mean_l2_dist', 'mean_li_dist', 'mean_l0_dist_value', 'mean_l0_dist_pixel', 'prediction_after_attack']
+    fieldnames = ['dataset_name', 'model_name', 'attack_string', 'original_label_index', 'random',  'duration_per_sample', 'discretization', 'success_rate', 'mean_confidence', 'mean_l2_dist', 'mean_li_dist', 'mean_l0_dist_value', 'mean_l0_dist_pixel', 'prediction_after_attack']
     write_to_csv(to_csv, attacks_evaluation_csv_fpath, fieldnames)
 
     if FLAGS.visualize is True:
