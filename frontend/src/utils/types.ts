@@ -20,8 +20,9 @@ export interface SuccessfulServerResponse {
     mean_li_dist: number | null;
     mean_l0_dist_value: number | null;
     mean_l0_dist_pixel: number | null;
-    prediction_before_attack: number;
+    original_label_index: number;
     prediction_after_attack: number;
+    random: boolean;
   };
 }
 
@@ -36,6 +37,7 @@ export interface IndexRouteLocationState {
   selectedDataset: DATASET;
   selectedLabel: string;
   selectedAttack: string;
+  selectedRandom: boolean;
 }
 
 export type DATASET = "MNIST" | "CIFAR-10" | "ImageNet";

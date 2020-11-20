@@ -59,7 +59,11 @@ const InputForm = forwardRef<HTMLFormElement, Props>(
             defaultValue={indexRouteLocationState?.selectedLabel}
             options={labels}
           />
-          <BooleanInput label="Random" helperText="Select image randomly" />
+          <BooleanInput
+            label="Random"
+            helperText="Select image randomly"
+            defaultChecked={indexRouteLocationState?.selectedRandom}
+          />
           <TextFieldInput
             label="Attack"
             helperText="Attack string, with parameters. Specify exactly one."

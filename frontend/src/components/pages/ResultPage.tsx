@@ -46,7 +46,7 @@ const ResultPage: React.FC<Props> = ({ serverResponse }) => {
 
   const { evaluation, images } = serverResponse;
   const labels = DATA[evaluation.dataset_name].labels;
-  const originalImageLabel = labels[evaluation.prediction_before_attack];
+  const originalImageLabel = labels[evaluation.original_label_index];
   const attackedImageLabel = labels[evaluation.prediction_after_attack];
   const model = FLIPPED_MODEL_OBJ[evaluation.model_name];
 
@@ -59,6 +59,7 @@ const ResultPage: React.FC<Props> = ({ serverResponse }) => {
             selectedDataset: evaluation.dataset_name,
             selectedAttack: evaluation.attack_string,
             selectedLabel: originalImageLabel,
+            selectedRandom: evaluation.random,
           })
         }
       />

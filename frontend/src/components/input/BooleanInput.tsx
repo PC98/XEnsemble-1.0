@@ -13,15 +13,22 @@ const useStyles = makeStyles({
 interface Props {
   label: string;
   helperText: string;
+  defaultChecked?: boolean;
 }
 
-const BooleanInput: React.FC<Props> = ({ label, helperText }) => {
+const BooleanInput: React.FC<Props> = ({
+  label,
+  helperText,
+  defaultChecked = true,
+}) => {
   const { container } = useStyles();
 
   return (
     <FormControlLabel
       classes={{ root: container }}
-      control={<Switch defaultChecked name={label} color="primary" />}
+      control={
+        <Switch defaultChecked={defaultChecked} name={label} color="primary" />
+      }
       label={helperText}
     />
   );

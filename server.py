@@ -50,13 +50,11 @@ def api_form():
             else:
                 eval_dict[key] = float_val
 
-        keys_of_int_data = ['prediction_after_attack']
+        keys_of_int_data = ['original_label_index', 'prediction_after_attack']
         for key in keys_of_int_data:
             eval_dict[key] = int(eval_dict[key])
-        # the attack script will ensure that the attack runs on a correctly classified image
-        eval_dict['prediction_before_attack'] = int(form_input['Label'])
 
-        keys_of_bool_data = ['discretization']
+        keys_of_bool_data = ['discretization', 'random']
         for key in keys_of_bool_data:
             eval_dict[key] = True if eval_dict[key] == "True" else False
 
