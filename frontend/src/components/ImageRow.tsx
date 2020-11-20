@@ -19,6 +19,8 @@ const useStyles = makeStyles({
   },
 });
 
+const withModelPredictionPrefix = (str: string) => `Model prediction: ${str}`;
+
 const ImageRow: React.FC<Props> = ({
   images,
   className,
@@ -33,13 +35,13 @@ const ImageRow: React.FC<Props> = ({
         encodedImage={images.original}
         altText="before attack"
         label="Image before attack"
-        caption={`Model prediction: ${originalImageLabel}`}
+        caption={withModelPredictionPrefix(originalImageLabel)}
       />
       <ImageRowElement
         encodedImage={images.attacked}
         altText="after attack"
         label="Image after attack"
-        caption={`Model prediction: ${attackedImageLabel}`}
+        caption={withModelPredictionPrefix(attackedImageLabel)}
       />
       <ImageRowElement
         encodedImage={images.difference}

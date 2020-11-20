@@ -79,7 +79,7 @@ const AttackEvaluationTable: React.FC<Props> = ({
           <TableBody>
             <TableRow>
               <TableCell component="th" scope="row" align="right">
-                {duration_per_sample.toFixed(3)}
+                {toDecimalPlacesOrNaN(duration_per_sample)}
               </TableCell>
               <TableCell align="right">
                 {toDecimalPlacesOrNaN(mean_confidence, true)}
