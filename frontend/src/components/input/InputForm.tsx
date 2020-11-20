@@ -5,17 +5,18 @@ import makeStyles from "@material-ui/core/styles/makeStyles";
 import DropdownInput from "./DropdownInput";
 import TextFieldInput from "./TextFieldInput";
 import BooleanInput from "./BooleanInput";
+import { IndexRouteLocationState } from "../../utils/types";
 
 interface Props {
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
   isLoading: boolean;
   models: string[];
   labels: string[];
+  indexRouteLocationState?: IndexRouteLocationState;
 }
 
 const useStyles = makeStyles({
   container: {
-    padding: 20,
     display: "flex",
     flex: 1,
     justifyContent: "center",
@@ -39,7 +40,7 @@ const useStyles = makeStyles({
 });
 
 const InputForm = forwardRef<HTMLFormElement, Props>(
-  ({ onSubmit, isLoading, models, labels }, ref) => {
+  ({ onSubmit, isLoading, models, labels, indexRouteLocationState }, ref) => {
     const { container, form, button, spinner } = useStyles();
 
     return (
@@ -48,12 +49,14 @@ const InputForm = forwardRef<HTMLFormElement, Props>(
           <DropdownInput
             label="Model"
             helperText="Trained model on which the attack will run."
+            defaultValue={indexRouteLocationState?.selectedModel}
             options={models}
             shouldSortOptions
           />
           <DropdownInput
             label="Label"
             helperText="Class label of the image to attack."
+            defaultValue={indexRouteLocationState?.selectedLabel}
             options={labels}
           />
           <BooleanInput label="Random" helperText="Select image randomly" />
@@ -61,6 +64,7 @@ const InputForm = forwardRef<HTMLFormElement, Props>(
             label="Attack"
             helperText="Attack string, with parameters. Specify exactly one."
             inputProps={{ pattern: "[^;]*;?[^;]*$" }} // Regex such that only at-most one semi-colon is allowed.
+            defaultValue={indexRouteLocationState?.selectedAttack}
           />
           <Button
             className={button}

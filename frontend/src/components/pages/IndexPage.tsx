@@ -1,9 +1,18 @@
 import React, { useRef, useCallback, useState } from "react";
+import { RouteComponentProps } from "react-router-dom";
+import { StaticContext } from "react-router";
 import InputForm from "../input/InputForm";
 import NavigationTabBar from "../NavigationTabBar";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import usePostRequest from "../../utils/usePostRequest";
-import { ServerResponse, DATA, DATASET, MODEL_OBJ } from "../../utils/types";
+import { useHistory } from "react-router-dom";
+import {
+  ServerResponse,
+  DATA,
+  DATASET,
+  MODEL_OBJ,
+  IndexRouteLocationState,
+} from "../../utils/types";
 
 const useStyles = makeStyles({
   container: {
@@ -13,13 +22,26 @@ const useStyles = makeStyles({
   },
 });
 
-interface Props {
+export type RouteProps = RouteComponentProps<
+  {},
+  StaticContext,
+  IndexRouteLocationState | undefined
+>;
+
+interface Props extends RouteProps {
   serverResponseCallback: (response: ServerResponse | null) => void;
 }
 
-const IndexPage: React.FC<Props> = ({ serverResponseCallback }) => {
+const IndexPage: React.FC<Props> = ({
+  serverResponseCallback,
+  ...routeProps
+}) => {
+  const history = useHistory();
   const formRef = useRef<HTMLFormElement>(null);
-  const [tabValue, setTabValue] = useState<DATASET>("MNIST");
+  const indexRouteLocationState = routeProps.location.state;
+  const [tabValue, setTabValue] = useState<DATASET>(
+    indexRouteLocationState?.selectedDataset ?? "MNIST"
+  );
   const { container } = useStyles();
 
   const { isLoading, makeRequest } = usePostRequest();
@@ -39,7 +61,6 @@ const IndexPage: React.FC<Props> = ({ serverResponseCallback }) => {
       data.set("Dataset", tabValue);
       data.set("Random", String(randomVal == null ? 0 : 1));
 
-      // TODO: Check if success parameter in server response is false.
       serverResponseCallback(await makeRequest(data));
     },
     [makeRequest, serverResponseCallback, tabValue]
@@ -50,7 +71,10 @@ const IndexPage: React.FC<Props> = ({ serverResponseCallback }) => {
       <NavigationTabBar
         labels={Object.keys(DATA)}
         value={tabValue}
-        onChangeValue={(newValue) => void setTabValue(newValue as DATASET)}
+        onChangeValue={(newValue) => {
+          setTabValue(newValue as DATASET);
+          history.replace("/");
+        }}
         isLoading={isLoading}
       />
       <InputForm
@@ -59,6 +83,7 @@ const IndexPage: React.FC<Props> = ({ serverResponseCallback }) => {
         isLoading={isLoading}
         {...DATA[tabValue]}
         key={tabValue}
+        indexRouteLocationState={indexRouteLocationState}
       />
     </div>
   );

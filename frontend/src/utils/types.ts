@@ -1,6 +1,41 @@
 import imagenetLabels from "./ImageNetLabels";
-export interface ServerResponse {
+
+export interface SuccessfulServerResponse {
   success: boolean;
+  images: {
+    original: string;
+    attacked: string;
+    difference: string;
+  };
+  evaluation: {
+    dataset_name: DATASET;
+    model_name: string;
+    attack_string: string;
+    duration_per_sample: number;
+    discretization: boolean; // always true; UI is thus not displaying this for now
+    success_rate: number;
+    // all "mean" metrics are susceptible to NaN values, which the JSON will treat as null
+    mean_confidence: number | null;
+    mean_l2_dist: number | null;
+    mean_li_dist: number | null;
+    mean_l0_dist_value: number | null;
+    mean_l0_dist_pixel: number | null;
+    prediction_before_attack: number;
+    prediction_after_attack: number;
+  };
+}
+
+export type ServerResponse =
+  | {
+      success: false;
+    }
+  | SuccessfulServerResponse;
+
+export interface IndexRouteLocationState {
+  selectedModel: MODEL;
+  selectedDataset: DATASET;
+  selectedLabel: string;
+  selectedAttack: string;
 }
 
 export type DATASET = "MNIST" | "CIFAR-10" | "ImageNet";
@@ -33,7 +68,18 @@ export const MODEL_OBJ = {
   "Inception v3": "inceptionv3",
   MobileNet: "mobilenet",
 } as const;
-type MODEL = keyof typeof MODEL_OBJ;
+export type MODEL = keyof typeof MODEL_OBJ;
+
+// Reverse of MODEL_OBJ, used for results page
+// @ts-ignore
+export const FLIPPED_MODEL_OBJ: { [k in string]: MODEL } = Object.keys(
+  MODEL_OBJ
+  // @ts-ignore
+).reduce((flipped, key: MODEL) => {
+  // @ts-ignore
+  flipped[MODEL_OBJ[key]] = key;
+  return flipped;
+}, {});
 
 const addIndicesToLabels = (labels: string[]) =>
   labels.map((label, index) => `${label} (${index})`);

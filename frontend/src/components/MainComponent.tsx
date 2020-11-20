@@ -21,9 +21,17 @@ const MainComponent: React.FC = () => {
 
   return (
     <Switch>
-      <Route exact path="/">
-        <IndexPage serverResponseCallback={serverResponseCallback} />
-      </Route>
+      <Route
+        exact
+        path="/"
+        render={(routeProps) => (
+          // @ts-ignore
+          <IndexPage
+            serverResponseCallback={serverResponseCallback}
+            {...routeProps}
+          />
+        )}
+      />
       <Route path="/result">
         <ResultPage serverResponse={serverResponse} />
       </Route>

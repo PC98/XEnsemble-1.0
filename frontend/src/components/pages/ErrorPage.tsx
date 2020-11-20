@@ -20,8 +20,7 @@ const ErrorPage: React.FC = () => {
     <div className={container}>
       <ErrorOutlineIcon fontSize="large" color="error" />
       <Typography>
-        We encountered an error while processing your request. Please try again
-        later.
+        We encountered an error while processing your request.
       </Typography>
     </div>
   );

@@ -22,7 +22,6 @@ const usePostRequest = () => {
 
       return response.json() as Promise<ServerResponse>;
     } catch (error) {
-      alert(error);
       return null;
     } finally {
       setIsLoading(false);
