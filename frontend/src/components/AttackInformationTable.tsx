@@ -27,6 +27,9 @@ const useStyles = makeStyles({
     marginTop: 16,
     width: "68%",
   },
+  wordBreak: {
+    wordBreak: "break-all",
+  },
 });
 
 const AttackInformationTable: React.FC<Props> = ({
@@ -35,7 +38,7 @@ const AttackInformationTable: React.FC<Props> = ({
   attack_string,
   className,
 }) => {
-  const { container, tableContainer } = useStyles();
+  const { container, tableContainer, wordBreak } = useStyles();
 
   return (
     <div className={clsx(container, className)}>
@@ -55,7 +58,7 @@ const AttackInformationTable: React.FC<Props> = ({
                 {dataset_name}
               </TableCell>
               <TableCell>{model}</TableCell>
-              <TableCell align="center" style={{ wordBreak: "break-all" }}>
+              <TableCell align="center" classes={{ root: wordBreak }}>
                 {attack_string}
               </TableCell>
             </TableRow>
