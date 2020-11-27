@@ -175,7 +175,8 @@ def main(argv=None):
            (task['dataset_name'], task['model_name'])
 
     FLAGS.result_folder = os.path.join(FLAGS.result_folder, task_id)
-    shutil.rmtree(FLAGS.result_folder)
+    if os.path.exists(FLAGS.result_folder):
+        shutil.rmtree(FLAGS.result_folder)
     if not os.path.isdir(FLAGS.result_folder):
         os.makedirs(FLAGS.result_folder)
 
