@@ -25,7 +25,7 @@ flags.DEFINE_string('dataset_name', 'MNIST', 'Supported: MNIST, CIFAR-10, ImageN
 flags.DEFINE_string('model_name', 'cleverhans', 'Supported: cleverhans, cleverhans_adv_trained and carlini for MNIST; carlini and DenseNet for CIFAR-10; ResNet50, VGG19, Inceptionv3 and MobileNet for ImageNet.')
 
 flags.DEFINE_boolean('select', True, 'Select correctly classified examples for the experiment.')
-flags.DEFINE_integer('nb_examples', 1, 'The number of examples selected for attacks.')
+flags.DEFINE_integer('nb_examples', 6, 'The number of examples selected for attacks.')
 flags.DEFINE_integer('label_index', 0, 'The index of desired label in dataset.')
 flags.DEFINE_integer('random_image', 1, '0 if random is off, any integer otherwise')
 flags.DEFINE_boolean('balance_sampling', False, 'Select the same number of examples for each class.')
@@ -59,7 +59,7 @@ def load_tf_session():
 def main(argv=None):
     # 0. Select a dataset.
     from datasets import MNISTDataset, CIFAR10Dataset, ImageNetDataset, LFWDataset
-    from datasets import get_correct_prediction_idx, evaluate_adversarial_examples, calculate_mean_confidence, calculate_accuracy
+    from datasets import get_correct_prediction_idx, evaluate_adversarial_examples2, calculate_mean_confidence, calculate_accuracy
     from utils.parameter_parser import parse_params
 
     if FLAGS.dataset_name == "MNIST":
@@ -175,6 +175,7 @@ def main(argv=None):
            (task['dataset_name'], task['model_name'])
 
     FLAGS.result_folder = os.path.join(FLAGS.result_folder, task_id)
+    shutil.rmtree(FLAGS.result_folder)
     if not os.path.isdir(FLAGS.result_folder):
         os.makedirs(FLAGS.result_folder)
 
@@ -273,7 +274,7 @@ def main(argv=None):
         Y_test_adv_discret_pred = model.predict(X_test_adv_discret)
         Y_test_adv_discretized_pred_list.append(Y_test_adv_discret_pred)
 
-        rec = evaluate_adversarial_examples(X_test, Y_test, X_test_adv_discret, Y_test_target.copy(), targeted, Y_test_adv_discret_pred)
+        rec = evaluate_adversarial_examples2(X_test, Y_test, X_test_adv_discret, Y_test_target.copy(), targeted, Y_test_adv_discret_pred)
         rec['dataset_name'] = FLAGS.dataset_name
         rec['model_name'] = FLAGS.model_name
         rec['attack_string'] = attack_string
@@ -281,12 +282,12 @@ def main(argv=None):
         rec['random'] = True if FLAGS.random_image != 0 else False
         rec['duration_per_sample'] = dur_per_sample
         rec['discretization'] = True
-        rec['prediction_after_attack'] = np.argmax(Y_test_adv_discret_pred[0])
+        rec['prediction_after_attack'] = np.argmax(Y_test_adv_discret_pred,axis=1)
         to_csv.append(rec)
 
     from utils.output import write_to_csv
     attacks_evaluation_csv_fpath = os.path.join(FLAGS.result_folder,"evaluation.csv")
-    fieldnames = ['dataset_name', 'model_name', 'attack_string', 'original_label_index', 'random',  'duration_per_sample', 'discretization', 'success_rate', 'mean_confidence', 'mean_l2_dist', 'mean_li_dist', 'mean_l0_dist_value', 'mean_l0_dist_pixel', 'prediction_after_attack']
+    fieldnames = ['dataset_name', 'model_name', 'attack_string', 'original_label_index', 'random',  'duration_per_sample', 'discretization', 'success_rate', 'mean_confidence', 'confidence_scores', 'mean_l2_dist', 'mean_li_dist', 'mean_l0_dist_value', 'mean_l0_dist_pixel', 'prediction_after_attack']
     write_to_csv(to_csv, attacks_evaluation_csv_fpath, fieldnames)
 
     if FLAGS.visualize is True:
@@ -294,14 +295,13 @@ def main(argv=None):
         if FLAGS.test_mode or FLAGS.balance_sampling:
             selected_idx_vis = range(Y_test.shape[1])
         else:
-            selected_idx_vis = get_first_n_examples_id_each_class(Y_test, 1)
+            #selected_idx_vis = get_first_n_examples_id_each_class(Y_test, 1)
             #selected_idx_vis = selected_idx
-
+            selected_idx_vis = [i for i in range(FLAGS.nb_examples)]
         legitimate_examples = X_test[selected_idx_vis]
 
         rows = [legitimate_examples]
         rows += map(lambda x: x[selected_idx_vis], X_test_adv_list)
-
         img_fpath = os.path.join(FLAGS.result_folder, '%s_attacks_%s_examples.png' % (task_id, attack_string_hash))
         show_imgs_in_rows2(rows, dataset.num_channels, img_fpath)
         print('\n===Adversarial image examples are saved in ', img_fpath)

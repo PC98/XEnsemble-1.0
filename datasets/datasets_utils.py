@@ -108,6 +108,21 @@ def calculate_mean_confidence(Y_pred, Y_target):
 
     return mean_confidence
 
+def calculate_mean_confidence2(Y_pred, Y_target):
+    """
+    Calculate the mean confidence on target classes.
+    :param Y_pred: softmax output
+    :param Y_target: target classes in shape (#samples, #classes)
+    :return: the mean confidence.
+    """
+    assert len(Y_pred) == len(Y_target)
+    confidence = np.multiply(Y_pred, Y_target)
+    confidence = np.max(confidence, axis=1)
+
+    mean_confidence = np.mean(confidence)
+
+    return mean_confidence, confidence
+
 
 def get_match_pred_vec(Y_pred, Y_label):
     assert len(Y_pred) == len(Y_label)
@@ -162,6 +177,36 @@ def evaluate_adversarial_examples(X_test, Y_test, X_test_adv, Y_test_target, tar
     rec = {}
     rec['success_rate'] = success_rate
     rec['mean_confidence'] = mean_conf
+    rec['mean_l2_dist'] = mean_l2_dist
+    rec['mean_li_dist'] = mean_li_dist
+    rec['mean_l0_dist_value'] = mean_l0_dist_value
+    rec['mean_l0_dist_pixel'] = mean_l0_dist_pixel
+
+    return rec
+
+def evaluate_adversarial_examples2(X_test, Y_test, X_test_adv, Y_test_target, targeted, Y_test_adv_pred):
+    success_rate = calculate_accuracy(Y_test_adv_pred, Y_test_target)
+    success_idx = get_match_pred_vec(Y_test_adv_pred, Y_test_target)
+
+    if targeted is False:
+        success_rate = 1 - success_rate
+        success_idx = np.logical_not(success_idx)
+
+    # Calculate the mean confidence of the successful adversarial examples.
+    mean_conf, confs = calculate_mean_confidence2(Y_test_adv_pred[success_idx], Y_test_target[success_idx])
+    if targeted is False:
+        mean_conf = 1 - mean_conf
+
+    mean_l2_dist, mean_li_dist, mean_l0_dist_value, mean_l0_dist_pixel = calculate_mean_distance(X_test[success_idx], X_test_adv[success_idx])
+    # print ("\n---Attack: %s" % attack_string)
+    print("Success rate: %.2f%%, Mean confidence of SAEs: %.2f%%" % (success_rate * 100, mean_conf * 100))
+    print("### Statistics of the SAEs:")
+    print("L2 dist: %.4f, Li dist: %.4f, L0 dist_value: %.1f%%, L0 dist_pixel: %.1f%%" % (mean_l2_dist, mean_li_dist, mean_l0_dist_value * 100, mean_l0_dist_pixel * 100))
+
+    rec = {}
+    rec['success_rate'] = success_rate
+    rec['mean_confidence'] = mean_conf
+    rec['confidence_scores'] = confs
     rec['mean_l2_dist'] = mean_l2_dist
     rec['mean_li_dist'] = mean_li_dist
     rec['mean_l0_dist_value'] = mean_l0_dist_value
