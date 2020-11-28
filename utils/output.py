@@ -70,9 +70,12 @@ def save_task_descriptor(result_folder, to_csv):
                   'accuracy_test_selected', 'mean_confidence_test_selected']
     write_to_csv(to_csv, fpath, fieldnames)
 
-def save_task_descriptor2(result_folder, to_csv):
+def save_task_descriptor2(result_folder, to_csv, val = None):
     task = to_csv[0]
-    fname = "description.csv"
+    if val:
+        fname = val + "description.csv"
+    else:
+        fname = "description.csv"
     #fname = "%s_%d_%s_task_desc.csv" % (task['dataset_name'], task['test_set_selected_length'], task['model_name'])
     fpath = os.path.join(result_folder, fname)
 

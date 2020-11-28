@@ -117,7 +117,9 @@ def calculate_mean_confidence2(Y_pred, Y_target):
     """
     assert len(Y_pred) == len(Y_target)
     confidence = np.multiply(Y_pred, Y_target)
+    print("LEN",len(confidence))
     confidence = np.max(confidence, axis=1)
+    print("lolwhat", len(confidence))
 
     mean_confidence = np.mean(confidence)
 

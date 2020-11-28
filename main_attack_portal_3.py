@@ -17,6 +17,11 @@ import numpy as np
 import tensorflow as tf
 from tensorflow.python.platform import flags
 
+from utils.parameter_parser import parse_params
+
+from datasets import get_correct_prediction_idx, evaluate_adversarial_examples2, calculate_mean_confidence, calculate_accuracy
+
+
 tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
 
 FLAGS = flags.FLAGS
@@ -55,35 +60,7 @@ def load_tf_session():
     print("Created TensorFlow session and set Keras backend.")
     return sess
 
-
-def main(argv=None):
-    # 0. Select a dataset.
-    from datasets import MNISTDataset, CIFAR10Dataset, ImageNetDataset, LFWDataset
-    from datasets import get_correct_prediction_idx, evaluate_adversarial_examples2, calculate_mean_confidence, calculate_accuracy
-    from utils.parameter_parser import parse_params
-
-    if FLAGS.dataset_name == "MNIST":
-        dataset = MNISTDataset()
-    elif FLAGS.dataset_name == "CIFAR-10":
-        dataset = CIFAR10Dataset()
-    elif FLAGS.dataset_name == "ImageNet":
-        dataset = ImageNetDataset()
-    elif FLAGS.dataset_name == "LFW":
-        dataset = LFWDataset()
-
-    # 1. Load a dataset.
-    print("\n===Loading %s data..." % FLAGS.dataset_name)
-    if FLAGS.dataset_name == 'ImageNet':
-        if FLAGS.model_name == 'inceptionv3':
-            img_size = 299
-        else:
-            img_size = 224
-        X_test_all, Y_test_all = dataset.get_test_data(img_size, 0, 200)
-    else:
-        X_test_all, Y_test_all = dataset.get_test_dataset()
-    #z = np.where(Y_test_all == np.asarray([1, 0, 0, 0, 0, 0, 0, 0, 0, 0]))
-
-    #LABEL SELECTION
+def label_selection(X_test_all, Y_test_all):
     label = np.asarray([0] * Y_test_all.shape[1])
     label[FLAGS.label_index] = 1
     filter_indices = []
@@ -94,6 +71,12 @@ def main(argv=None):
     X_test_all = np.take(X_test_all, filter_indices, 0)
     Y_test_all = np.take(Y_test_all, filter_indices, 0)
     print(X_test_all.shape, Y_test_all.shape)
+    return X_test_all, Y_test_all
+
+def run_model(X_test_all, Y_test_all, dataset, modeln, val = None):
+
+    if val:
+        tf.reset_default_graph()
 
     # 2. Load a trained model.
     sess = load_tf_session()
@@ -102,12 +85,12 @@ def main(argv=None):
     x = tf.placeholder(tf.float32, shape=(None, dataset.image_size, dataset.image_size, dataset.num_channels))
     y = tf.placeholder(tf.float32, shape=(None, dataset.num_classes))
 
-    with tf.variable_scope(FLAGS.model_name):
+    with tf.variable_scope(modeln):
         """
         Create a model instance for prediction.
         The scaling argument, 'input_range_type': {1: [0,1], 2:[-0.5, 0.5], 3:[-1, 1]...}
         """
-        model = dataset.load_model_by_name(FLAGS.model_name, logits=False, input_range_type=1)
+        model = dataset.load_model_by_name(modeln, logits=False, input_range_type=1)
         model.compile(loss='categorical_crossentropy', optimizer='sgd', metrics=['acc'])
 
     # 3. Evaluate the trained model.
@@ -118,6 +101,10 @@ def main(argv=None):
     accuracy_all = calculate_accuracy(Y_pred_all, Y_test_all)
     print('Test accuracy on raw legitimate examples %.4f' % (accuracy_all))
     print('Mean confidence on ground truth classes %.4f' % (mean_conf_all))
+
+    return sess, model, x, y, Y_pred_all, mean_conf_all, accuracy_all
+
+def attack_and_visualize(sess, model, dataset, x, y, Y_pred_all, Y_test_all, X_test_all, mean_conf_all, accuracy_all, val = None):
 
     # 4. Select some examples to attack.
     import hashlib
@@ -181,7 +168,7 @@ def main(argv=None):
         os.makedirs(FLAGS.result_folder)
 
     from utils.output import save_task_descriptor2
-    save_task_descriptor2(FLAGS.result_folder, [task])
+    save_task_descriptor2(FLAGS.result_folder, [task], val)
 
     # 5. Generate adversarial examples.
     from attacks import maybe_generate_adv_examples
@@ -300,7 +287,13 @@ def main(argv=None):
         to_csv.append(rec)
 
     from utils.output import write_to_csv
-    attacks_evaluation_csv_fpath = os.path.join(FLAGS.result_folder,"evaluation.csv")
+
+    if val:
+        savename = val+"evaluation.csv"
+    else:
+        savename = "evaluation.csv"
+
+    attacks_evaluation_csv_fpath = os.path.join(FLAGS.result_folder, savename)
     fieldnames = ['dataset_name', 'model_name', 'attack_string', 'original_label_index', 'random',  'duration_per_sample', 'discretization', 'success_rate', 'mean_confidence', 'confidence_scores', 'mean_l2_dist', 'mean_li_dist', 'mean_l0_dist_value', 'mean_l0_dist_pixel', 'prediction_after_attack']
     write_to_csv(to_csv, attacks_evaluation_csv_fpath, fieldnames)
 
@@ -317,7 +310,7 @@ def main(argv=None):
         rows = [legitimate_examples]
         rows += map(lambda x: x[selected_idx_vis], X_test_adv_list)
         img_fpath = os.path.join(FLAGS.result_folder, '%s_attacks_%s_examples.png' % (task_id, attack_string_hash))
-        show_imgs_in_rows2(rows, dataset.num_channels, img_fpath)
+        show_imgs_in_rows2(rows, dataset.num_channels, img_fpath, val)
         print('\n===Adversarial image examples are saved in ', img_fpath)
         print(Y_test_adv_discretized_pred_list)
 
@@ -336,6 +329,55 @@ def main(argv=None):
         #print(Y_test_adv_discretized_pred_list)
 
         # TODO: output the prediction and confidence for each example, both legitimate and adversarial
+    sess.close()
+
+def main(argv=None):
+    # 0. Select a dataset.
+    from datasets import MNISTDataset, CIFAR10Dataset, ImageNetDataset, LFWDataset
+    from datasets import get_correct_prediction_idx, evaluate_adversarial_examples2, calculate_mean_confidence, calculate_accuracy
+
+    if FLAGS.dataset_name == "MNIST":
+        dataset = MNISTDataset()
+    elif FLAGS.dataset_name == "CIFAR-10":
+        dataset = CIFAR10Dataset()
+    elif FLAGS.dataset_name == "ImageNet":
+        dataset = ImageNetDataset()
+    elif FLAGS.dataset_name == "LFW":
+        dataset = LFWDataset()
+    elif FLAGS.dataset_name == "TWO":
+        dataset = MNISTDataset()
+        dataset2 = CIFAR10Dataset()
+
+    # 1. Load a dataset.
+    print("\n===Loading %s data..." % FLAGS.dataset_name)
+    if FLAGS.dataset_name == 'ImageNet':
+        if FLAGS.model_name == 'inceptionv3':
+            img_size = 299
+        else:
+            img_size = 224
+        X_test_all, Y_test_all = dataset.get_test_data(img_size, 0, 200)
+    else:
+        X_test_all, Y_test_all = dataset.get_test_dataset()
+        if FLAGS.dataset_name == "TWO":
+            X_test_all2, Y_test_all2 = dataset2.get_test_dataset()
+
+    #z = np.where(Y_test_all == np.asarray([1, 0, 0, 0, 0, 0, 0, 0, 0, 0]))
+
+    #Label selection
+    X_test_all, Y_test_all = label_selection(X_test_all, Y_test_all)
+    if FLAGS.dataset_name == "TWO":
+        X_test_all2, Y_test_all2 = label_selection(X_test_all2, Y_test_all2)
+
+    #2 and 3. Run the model
+    modeln = FLAGS.model_name
+    sess, model, x, y, Y_pred_all, mean_conf_all, accuracy_all = run_model(X_test_all, Y_test_all, dataset, modeln)
+
+    attack_and_visualize(sess, model, dataset, x, y, Y_pred_all, Y_test_all, X_test_all, mean_conf_all, accuracy_all)
+
+
+    if FLAGS.dataset_name == "TWO":
+        sess2, model2, x2, y2, Y_pred_all2, mean_conf_all2, accuracy_all2 = run_model(X_test_all2, Y_test_all2, dataset2, modeln, val = "TWO_")
+        attack_and_visualize(sess2, model2, dataset2, x2, y2, Y_pred_all2, Y_test_all2, X_test_all2, mean_conf_all2, accuracy_all2, val = "TWO_")
 
 
 if __name__ == '__main__':
