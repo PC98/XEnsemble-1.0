@@ -276,6 +276,19 @@ def main(argv=None):
         Y_test_adv_discretized_pred_list.append(Y_test_adv_discret_pred)
 
         rec = evaluate_adversarial_examples2(X_test, Y_test, X_test_adv_discret, Y_test_target.copy(), targeted, Y_test_adv_discret_pred)
+        confidences = rec['confidence_scores']
+        preds = np.argmax(Y_test_adv_discret_pred,axis=1)
+        k = 0
+        confidence_scores = ""
+        preds_after_attack = ""
+        for pred in preds:
+            preds_after_attack += str(pred) + ", "
+            if pred == FLAGS.label_index:
+                confidence_scores += "NaN" + ", "
+            else:
+                confidence_scores += str(confidences[k]) + ", "
+                k += 1
+        rec['confidence_scores'] = confidence_scores.rstrip(", ")
         rec['dataset_name'] = FLAGS.dataset_name
         rec['model_name'] = FLAGS.model_name
         rec['attack_string'] = attack_string
@@ -283,7 +296,7 @@ def main(argv=None):
         rec['random'] = True if FLAGS.random_image != 0 else False
         rec['duration_per_sample'] = dur_per_sample
         rec['discretization'] = True
-        rec['prediction_after_attack'] = np.argmax(Y_test_adv_discret_pred,axis=1)
+        rec['prediction_after_attack'] = preds_after_attack.rstrip(", ")
         to_csv.append(rec)
 
     from utils.output import write_to_csv
