@@ -44,7 +44,7 @@ def show_imgs_in_rows(rows, fpath=None):
         new_im.save(fpath)
     # new_im.show()
 
-def show_imgs_in_rows2(rows, num_channels, fpath=None):
+def show_imgs_in_rows2(rows, num_channels, fpath=None, val = None):
     # TODO: get the maximum.
     width_num = len(rows[0])
     height_num = len(rows)
@@ -69,16 +69,23 @@ def show_imgs_in_rows2(rows, num_channels, fpath=None):
         img = Image.fromarray((np.squeeze(originals[i]) * 255).astype(np.uint8))
         original.paste(img, (0, 0))
         original = original.resize(size=(img_width * 3, img_height * 3))
-        original.save(fpath.split('/')[0] + "/" + fpath.split('/')[1] + "/original" + str(i) + ".png")
         adversarial = Image.new('RGB', (total_width, total_height), (255, 255, 255))
         img = Image.fromarray((np.squeeze(adversarials[i]) * 255).astype(np.uint8))
         adversarial.paste(img, (0, 0))
         adversarial = adversarial.resize(size=(img_width * 3, img_height * 3))
-        adversarial.save(fpath.split('/')[0] + "/" + fpath.split('/')[1] + "/adversarial" + str(i) + ".png")
         difference = ImageChops.difference(original, adversarial)
         if num_channels > 1:
             difference = ImageChops.invert(difference)
-        difference.save(fpath.split('/')[0] + "/" + fpath.split('/')[1] + "/difference" + str(i) + ".png")
+
+        if val:
+            original.save(fpath.split('/')[0] + "/" + fpath.split('/')[1] + "/" + val + "original" + str(i) + ".png")
+            adversarial.save(fpath.split('/')[0] + "/" + fpath.split('/')[1] + "/" + val + "adversarial" + str(i) + ".png")
+            difference.save(fpath.split('/')[0] + "/" + fpath.split('/')[1] + "/" + val + "difference" + str(i) + ".png")
+
+        else:
+            original.save(fpath.split('/')[0] + "/" + fpath.split('/')[1] + "/original" + str(i) + ".png")
+            adversarial.save(fpath.split('/')[0] + "/" + fpath.split('/')[1] + "/adversarial" + str(i) + ".png")
+            difference.save(fpath.split('/')[0] + "/" + fpath.split('/')[1] + "/difference" + str(i) + ".png")
         #print(i)
 
     """i = 1
