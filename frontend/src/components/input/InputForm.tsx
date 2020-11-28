@@ -1,11 +1,14 @@
-import React, { forwardRef } from "react";
+import React, { forwardRef, useCallback, useState } from "react";
+import clsx from "clsx";
 import Button from "@material-ui/core/Button";
 import CircularProgress from "@material-ui/core/CircularProgress";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import DropdownInput from "./DropdownInput";
-import TextFieldInput from "./TextFieldInput";
+import AttackParametersInput from "./AttackParametersInput";
 import BooleanInput from "./BooleanInput";
+import TextFieldInput from "./TextFieldInput";
 import { IndexRouteLocationState } from "../../utils/types";
+import { ATTACK_OBJ, ATTACK } from "../../utils/data";
 
 interface Props {
   onSubmit: (e: React.FormEvent<HTMLFormElement>) => void;
@@ -19,33 +22,48 @@ const useStyles = makeStyles({
   container: {
     display: "flex",
     flex: 1,
-    justifyContent: "center",
-  },
-  form: {
-    display: "flex",
-    flex: 0.25,
-    minWidth: 280,
+    padding: 32,
     flexDirection: "column",
-    justifyContent: "center",
-    marginTop: -8,
-    marginBottom: -8,
-  },
-  button: {
-    marginTop: 8,
-    marginBottom: 8,
   },
   spinner: {
-    padding: 4,
+    padding: 5,
+  },
+  inputContainer: {
+    display: "flex",
+  },
+  bottomCentered: {
+    justifyContent: "center",
+    marginTop: "auto",
+  },
+  rightMargin: {
+    marginRight: 20,
+  },
+  attackInput: {
+    width: "33%",
+    minWidth: 416,
   },
 });
 
 const InputForm = forwardRef<HTMLFormElement, Props>(
   ({ onSubmit, isLoading, models, labels, indexRouteLocationState }, ref) => {
-    const { container, form, button, spinner } = useStyles();
+    const {
+      container,
+      spinner,
+      inputContainer,
+      bottomCentered,
+      rightMargin,
+      attackInput,
+    } = useStyles();
+
+    const [selectedAttack, setSelectedAttack] = useState<ATTACK | null>(null);
+
+    const onAttackSelect = useCallback((value: string | null) => {
+      setSelectedAttack(value as ATTACK | null);
+    }, []);
 
     return (
-      <div className={container}>
-        <form className={form} ref={ref} onSubmit={onSubmit}>
+      <form className={container} ref={ref} onSubmit={onSubmit}>
+        <div className={inputContainer}>
           <DropdownInput
             label="Model"
             helperText="Trained model on which the attack will run."
@@ -53,25 +71,41 @@ const InputForm = forwardRef<HTMLFormElement, Props>(
             options={models}
             shouldSortOptions
           />
-          <DropdownInput
-            label="Label"
-            helperText="Class label of the image to attack."
-            defaultValue={indexRouteLocationState?.selectedLabel}
-            options={labels}
-          />
-          <BooleanInput
-            label="Random"
-            helperText="Select image randomly"
-            defaultChecked={indexRouteLocationState?.selectedRandom}
-          />
+        </div>
+        <div className={inputContainer}>
+          <div className={rightMargin}>
+            <DropdownInput
+              label="Label"
+              helperText="Class label of the images to attack."
+              options={labels}
+            />
+          </div>
           <TextFieldInput
-            label="Attack"
-            helperText="Attack string, with parameters. Specify exactly one."
-            inputProps={{ pattern: "[^;]*;?[^;]*$" }} // Regex such that only at-most one semi-colon is allowed.
-            defaultValue={indexRouteLocationState?.selectedAttack}
+            label="Number"
+            helperText="Number of images to attack."
+            defaultValue={1}
+            inputProps={{ min: 1, max: 5 }}
+            type="number"
           />
+        </div>
+        <div className={inputContainer}>
+          <BooleanInput label="Random" helperText="Select images randomly" />
+        </div>
+        <div className={attackInput}>
+          <DropdownInput
+            label="Attack"
+            fullWidth
+            helperText="Choose the attack algorithm to run."
+            options={Object.keys(ATTACK_OBJ)}
+            onValueSelect={onAttackSelect}
+          />
+        </div>
+        {selectedAttack != null && (
+          <AttackParametersInput attackInfo={ATTACK_OBJ[selectedAttack]} />
+        )}
+        <div className={clsx(inputContainer, bottomCentered)}>
           <Button
-            className={button}
+            size="large"
             variant="contained"
             type="submit"
             color="primary"
@@ -83,8 +117,8 @@ const InputForm = forwardRef<HTMLFormElement, Props>(
               "Submit"
             )}
           </Button>
-        </form>
-      </div>
+        </div>
+      </form>
     );
   }
 );

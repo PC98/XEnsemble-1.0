@@ -6,12 +6,8 @@ import ImageRow from "../ImageRow";
 import AttackEvaluationTable from "../AttackEvaluationTable";
 import AttackInformationTable from "../AttackInformationTable";
 import AppBarWithBackButton from "../AppBarWithBackButton";
-import {
-  ServerResponse,
-  DATA,
-  IndexRouteLocationState,
-  FLIPPED_MODEL_OBJ,
-} from "../../utils/types";
+import { ServerResponse, IndexRouteLocationState } from "../../utils/types";
+import { DATASET, DATASET_OBJ, FLIPPED_MODEL_OBJ } from "../../utils/data";
 import { useHistory } from "react-router-dom";
 
 interface Props {
@@ -45,9 +41,9 @@ const ResultPage: React.FC<Props> = ({ serverResponse }) => {
   }
 
   const { evaluation, images } = serverResponse;
-  const labels = DATA[evaluation.dataset_name].labels;
+  const labels = DATASET_OBJ[evaluation.dataset_name as DATASET].labels;
   const originalImageLabel = labels[evaluation.original_label_index];
-  const attackedImageLabel = labels[evaluation.prediction_after_attack];
+  const attackedImageLabel = labels[evaluation.prediction_after_attack[0]];
   const model = FLIPPED_MODEL_OBJ[evaluation.model_name];
 
   return (
@@ -60,6 +56,7 @@ const ResultPage: React.FC<Props> = ({ serverResponse }) => {
             selectedAttack: evaluation.attack_string,
             selectedLabel: originalImageLabel,
             selectedRandom: evaluation.random,
+            selectedNBExamples: 1, // TODO
           })
         }
       />

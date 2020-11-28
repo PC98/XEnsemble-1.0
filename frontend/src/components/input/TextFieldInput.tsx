@@ -12,19 +12,20 @@ const useStyles = makeStyles({
   },
 });
 
-const TextFieldInput: React.FC<React.ComponentProps<typeof TextField>> = (
-  props
-) => {
+const TextFieldInput: React.FC<React.ComponentProps<typeof TextField>> = ({
+  required = true,
+  ...rest
+}) => {
   const { container, formHelperTextRoot } = useStyles();
 
   return (
     <TextField
       classes={{ root: container }}
-      required
+      required={required}
       variant="outlined"
-      name={props.label as string}
+      name={rest.label as string}
       FormHelperTextProps={{ classes: { root: formHelperTextRoot } }}
-      {...props}
+      {...rest}
     />
   );
 };
