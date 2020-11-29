@@ -6,13 +6,16 @@ import NavigationTabBar from "../NavigationTabBar";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import usePostRequest from "../../utils/usePostRequest";
 import { useHistory } from "react-router-dom";
+import { ServerResponse, IndexRouteLocationState } from "../../utils/types";
 import {
-  ServerResponse,
-  DATA,
+  DATASET_OBJ,
   DATASET,
   MODEL_OBJ,
-  IndexRouteLocationState,
-} from "../../utils/types";
+  ATTACK_OBJ,
+  ATTACK,
+  MODEL,
+  TARGETED_TYPES,
+} from "../../utils/data";
 
 const useStyles = makeStyles({
   container: {
@@ -40,7 +43,7 @@ const IndexPage: React.FC<Props> = ({
   const formRef = useRef<HTMLFormElement>(null);
   const indexRouteLocationState = routeProps.location.state;
   const [tabValue, setTabValue] = useState<DATASET>(
-    indexRouteLocationState?.selectedDataset ?? "MNIST"
+    (indexRouteLocationState?.selectedDataset as DATASET) ?? "MNIST"
   );
   const { container } = useStyles();
 
@@ -52,17 +55,57 @@ const IndexPage: React.FC<Props> = ({
       const data = new FormData(formRef.current ?? undefined);
       // Use labels from InputForm.tsx
       const labelStr = data.get("Label") as string;
-      const modelStr = data.get("Model") as string;
+      const modelStr = data.get("Model") as MODEL;
       const randomVal = data.get("Random") as string | null;
-      const attackStr = data.get("Attack") as string;
+      const attackType = data.get("Attack") as ATTACK;
 
-      data.set("Label", String(DATA[tabValue].labels.indexOf(labelStr))); // To make things easier for the back-end
-      // @ts-ignore
+      data.set("Label", String(DATASET_OBJ[tabValue].labels.indexOf(labelStr))); // To make things easier for the back-end
+
       data.set("Model", MODEL_OBJ[modelStr]);
       data.set("Dataset", tabValue);
-      data.set("Random", String(randomVal == null ? 0 : 1));
-      data.set("Attack", attackStr.trim()); // just in case
+      data.set("Random", String(randomVal == null ? 0 : 1)); // Random behaves a bit differently when compared to other boolean parameters
+      // Now, built the attack string:
+      const { value: attackKey, parameters } = ATTACK_OBJ[attackType];
+      const attackParameters: string[] = [];
+      Object.entries(parameters).forEach(([label, parameter]) => {
+        const key = parameter.value; // like "eps_iter"
+        const inputValue = data.get(label) as string | null; // target can be null for attacks that are both targeted and untargetd
+        let parsedValue;
+        switch (parameter.type) {
+          case "dropdown":
+            parsedValue = parameter.options.find((_) => _.name === inputValue)
+              ?.value;
+            break;
+          case "boolean":
+            parsedValue = inputValue == null ? "false" : "true";
+            break;
+          case "number":
+            parsedValue = inputValue;
+            break;
+          default: {
+            const _exhaustiveCheck: never = parameter;
+            return _exhaustiveCheck;
+          }
+        }
 
+        attackParameters.push(`${key}=${parsedValue}`);
+        data.delete(label); // optional
+      });
+
+      const target = data.get("Target") as string | null;
+      if (target != null && target in TARGETED_TYPES) {
+        // @ts-ignore
+        attackParameters.push(`targeted=${TARGETED_TYPES[target]}`);
+        data.delete("Target");
+      }
+
+      if (attackParameters.length > 0) {
+        data.set("Attack", `${attackKey}?${attackParameters.join("&")}`);
+      } else {
+        data.set("Attack", attackKey);
+      }
+
+      console.log(data.get("Attack"));
       serverResponseCallback(await makeRequest(data));
     },
     [makeRequest, serverResponseCallback, tabValue]
@@ -71,7 +114,7 @@ const IndexPage: React.FC<Props> = ({
   return (
     <div className={container}>
       <NavigationTabBar
-        labels={Object.keys(DATA)}
+        labels={Object.keys(DATASET_OBJ)}
         value={tabValue}
         onChangeValue={(newValue) => {
           setTabValue(newValue as DATASET);
@@ -83,9 +126,9 @@ const IndexPage: React.FC<Props> = ({
         ref={formRef}
         onSubmit={onSubmit}
         isLoading={isLoading}
-        {...DATA[tabValue]}
         key={tabValue}
         indexRouteLocationState={indexRouteLocationState}
+        {...DATASET_OBJ[tabValue]}
       />
     </div>
   );

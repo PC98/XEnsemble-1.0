@@ -10,7 +10,8 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 
-import { SuccessfulServerResponse, MODEL } from "../utils/types";
+import { SuccessfulServerResponse } from "../utils/types";
+import { MODEL } from "../utils/data";
 
 type Props = { className: string; model: MODEL } & Pick<
   SuccessfulServerResponse["evaluation"],
