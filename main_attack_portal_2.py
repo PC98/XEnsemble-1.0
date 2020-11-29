@@ -176,6 +176,8 @@ def main(argv=None):
 
     FLAGS.result_folder = os.path.join(FLAGS.result_folder, task_id)
     if os.path.exists(FLAGS.result_folder):
+        print("RESULTS FOLDER")
+        print(FLAGS.result_folder)
         shutil.rmtree(FLAGS.result_folder)
     if not os.path.isdir(FLAGS.result_folder):
         os.makedirs(FLAGS.result_folder)
@@ -297,11 +299,12 @@ def main(argv=None):
         rec['duration_per_sample'] = dur_per_sample
         rec['discretization'] = True
         rec['prediction_after_attack'] = preds_after_attack.rstrip(", ")
+        rec['number_of_images'] = FLAGS.nb_examples
         to_csv.append(rec)
 
     from utils.output import write_to_csv
     attacks_evaluation_csv_fpath = os.path.join(FLAGS.result_folder,"evaluation.csv")
-    fieldnames = ['dataset_name', 'model_name', 'attack_string', 'original_label_index', 'random',  'duration_per_sample', 'discretization', 'success_rate', 'mean_confidence', 'confidence_scores', 'mean_l2_dist', 'mean_li_dist', 'mean_l0_dist_value', 'mean_l0_dist_pixel', 'prediction_after_attack']
+    fieldnames = ['dataset_name', 'model_name', 'attack_string', 'original_label_index', 'random',  'duration_per_sample', 'discretization', 'success_rate', 'mean_confidence', 'confidence_scores', 'mean_l2_dist', 'mean_li_dist', 'mean_l0_dist_value', 'mean_l0_dist_pixel', 'prediction_after_attack', 'number_of_images']
     write_to_csv(to_csv, attacks_evaluation_csv_fpath, fieldnames)
 
     if FLAGS.visualize is True:
