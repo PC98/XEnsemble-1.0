@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-dataset="MNIST"
-model="cnn1_30"
-attack="fgsm?eps=0.3"
+dataset="CIFAR-10"
+model="resnet110"
+attack="fgsm?targeted=most"
 label_index=1
 random_image=1
 nb_examples=2
