@@ -134,6 +134,9 @@ def main(argv=None):
             if not FLAGS.balance_sampling:
                 # TODO: Possibly randomize this
                 if FLAGS.random_image != 0:
+                    np.random.seed(FLAGS.random_image)
+                    print("RANDOM NUMBER")
+                    print(np.random.randint(100))
                     np.random.shuffle(correct_idx)
                 selected_idx = correct_idx[:FLAGS.nb_examples]
             else:
