@@ -10,7 +10,7 @@ interface Props {
 
 const AppBarWithBackButton: React.FC<Props> = ({ onClick }) => {
   return (
-    <AppBar color="transparent" position="relative" elevation={1}>
+    <AppBar color="inherit" position="relative" elevation={1}>
       <Toolbar variant="dense">
         <IconButton onClick={onClick} edge="start" color="inherit">
           <ArrowBackIcon />

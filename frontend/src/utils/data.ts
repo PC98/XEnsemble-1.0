@@ -391,17 +391,6 @@ export const MODEL_OBJ = {
 } as const;
 export type MODEL = keyof typeof MODEL_OBJ;
 
-// Reverse of MODEL_OBJ, used for results page
-// @ts-ignore
-export const FLIPPED_MODEL_OBJ: { [k in string]: MODEL } = Object.keys(
-  MODEL_OBJ
-  // @ts-ignore
-).reduce((flipped, key: MODEL) => {
-  // @ts-ignore
-  flipped[MODEL_OBJ[key]] = key;
-  return flipped;
-}, {});
-
 const addIndicesToLabels = (labels: string[]) =>
   labels.map((label, index) => `${label} (${index})`);
 

@@ -43,7 +43,7 @@ const IndexPage: React.FC<Props> = ({
   const formRef = useRef<HTMLFormElement>(null);
   const indexRouteLocationState = routeProps.location.state;
   const [tabValue, setTabValue] = useState<DATASET>(
-    (indexRouteLocationState?.selectedDataset as DATASET) ?? "MNIST"
+    (indexRouteLocationState?.Dataset ?? "MNIST") as DATASET
   );
   const { container } = useStyles();
 
@@ -53,6 +53,11 @@ const IndexPage: React.FC<Props> = ({
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       const data = new FormData(formRef.current ?? undefined);
+      // Before processing anything, save user's input so that it can re-used later
+      data.set("Dataset", tabValue);
+      const userInput = Object.fromEntries(data.entries());
+      data.set("user_input", JSON.stringify(userInput));
+
       // Use labels from InputForm.tsx
       const labelStr = data.get("Label") as string;
       const modelStr = data.get("Model") as MODEL;
@@ -60,16 +65,14 @@ const IndexPage: React.FC<Props> = ({
       const attackType = data.get("Attack") as ATTACK;
 
       data.set("Label", String(DATASET_OBJ[tabValue].labels.indexOf(labelStr))); // To make things easier for the back-end
-
       data.set("Model", MODEL_OBJ[modelStr]);
-      data.set("Dataset", tabValue);
       data.set("Random", String(randomVal == null ? 0 : 1)); // Random behaves a bit differently when compared to other boolean parameters
-      // Now, built the attack string:
+      // Now, build the attack string:
       const { value: attackKey, parameters } = ATTACK_OBJ[attackType];
       const attackParameters: string[] = [];
       Object.entries(parameters).forEach(([label, parameter]) => {
         const key = parameter.value; // like "eps_iter"
-        const inputValue = data.get(label) as string | null; // target can be null for attacks that are both targeted and untargetd
+        const inputValue = data.get(label) as string | null;
         let parsedValue;
         switch (parameter.type) {
           case "dropdown":
@@ -105,7 +108,6 @@ const IndexPage: React.FC<Props> = ({
         data.set("Attack", attackKey);
       }
 
-      console.log(data.get("Attack"));
       serverResponseCallback(await makeRequest(data));
     },
     [makeRequest, serverResponseCallback, tabValue]

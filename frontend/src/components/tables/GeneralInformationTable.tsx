@@ -10,58 +10,60 @@ import TableHead from "@material-ui/core/TableHead";
 import TableRow from "@material-ui/core/TableRow";
 import Paper from "@material-ui/core/Paper";
 
-import { SuccessfulServerResponse } from "../utils/types";
-import { MODEL } from "../utils/data";
-
-type Props = { className: string; model: MODEL } & Pick<
-  SuccessfulServerResponse["evaluation"],
-  "dataset_name" | "attack_string"
->;
+interface Props {
+  dataset: string;
+  model: string;
+  labelAttacked: string;
+  numberAttacked: number;
+  randomSelection: boolean;
+  className: string;
+}
 
 const useStyles = makeStyles({
   container: {
     display: "flex",
-    flex: 1,
     flexDirection: "column",
   },
   tableContainer: {
     marginTop: 16,
-    width: "68%",
-  },
-  wordBreak: {
-    wordBreak: "break-all",
+    width: "62%",
+    minWidth: 740,
   },
 });
 
-const AttackInformationTable: React.FC<Props> = ({
-  dataset_name,
+const GeneralInformationTable: React.FC<Props> = ({
+  dataset,
   model,
-  attack_string,
+  labelAttacked,
+  numberAttacked,
+  randomSelection,
   className,
 }) => {
-  const { container, tableContainer, wordBreak } = useStyles();
+  const { container, tableContainer } = useStyles();
 
   return (
     <div className={clsx(container, className)}>
-      <Typography variant="h5">Attack Information</Typography>
+      <Typography variant="h5">General Information</Typography>
       <TableContainer classes={{ root: tableContainer }} component={Paper}>
         <Table>
           <TableHead>
             <TableRow>
               <TableCell>Dataset</TableCell>
               <TableCell>Model</TableCell>
-              <TableCell align="center">Attack string</TableCell>
+              <TableCell>Attacked label</TableCell>
+              <TableCell align="right">Num. of images attacked</TableCell>
+              <TableCell>Randomly selected images</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>
             <TableRow>
               <TableCell component="th" scope="row">
-                {dataset_name}
+                {dataset}
               </TableCell>
               <TableCell>{model}</TableCell>
-              <TableCell align="center" classes={{ root: wordBreak }}>
-                {attack_string}
-              </TableCell>
+              <TableCell>{labelAttacked}</TableCell>
+              <TableCell align="right">{numberAttacked}</TableCell>
+              <TableCell>{randomSelection ? "True" : "False"}</TableCell>
             </TableRow>
           </TableBody>
         </Table>
@@ -70,4 +72,4 @@ const AttackInformationTable: React.FC<Props> = ({
   );
 };
 
-export default AttackInformationTable;
+export default GeneralInformationTable;

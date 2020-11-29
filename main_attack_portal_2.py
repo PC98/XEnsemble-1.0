@@ -284,13 +284,13 @@ def main(argv=None):
         confidence_scores = ""
         preds_after_attack = ""
         for pred in preds:
-            preds_after_attack += str(pred) + ", "
+            preds_after_attack += str(pred) + ","
             if pred == FLAGS.label_index:
-                confidence_scores += "NaN" + ", "
+                confidence_scores += str(float("nan")) + ","
             else:
-                confidence_scores += str(confidences[k]) + ", "
+                confidence_scores += str(confidences[k]) + ","
                 k += 1
-        rec['confidence_scores'] = confidence_scores.rstrip(", ")
+        rec['confidence_scores'] = confidence_scores.rstrip(",")
         rec['dataset_name'] = FLAGS.dataset_name
         rec['model_name'] = FLAGS.model_name
         rec['attack_string'] = attack_string
@@ -298,7 +298,7 @@ def main(argv=None):
         rec['random'] = True if FLAGS.random_image != 0 else False
         rec['duration_per_sample'] = dur_per_sample
         rec['discretization'] = True
-        rec['prediction_after_attack'] = preds_after_attack.rstrip(", ")
+        rec['prediction_after_attack'] = preds_after_attack.rstrip(",")
         rec['number_of_images'] = FLAGS.nb_examples
         to_csv.append(rec)
 

@@ -13,13 +13,13 @@ const useStyles = makeStyles({
 interface Props {
   label: string;
   helperText: string;
-  defaultChecked?: boolean;
+  defaultChecked: boolean;
 }
 
 const BooleanInput: React.FC<Props> = ({
   label,
   helperText,
-  defaultChecked = true,
+  defaultChecked,
 }) => {
   const { container } = useStyles();
 

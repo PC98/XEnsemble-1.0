@@ -1,4 +1,4 @@
-import React, { useState, useCallback } from "react";
+import React, { useState, useCallback, useRef } from "react";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import DropdownInput from "./DropdownInput";
 import TextFieldInput from "./TextFieldInput";
@@ -7,6 +7,11 @@ import { AttackInformation } from "../../utils/types";
 import { TARGETED_TYPES } from "../../utils/data";
 import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
+import { IndexRouteLocationState } from "../../utils/types";
+import {
+  getBoolValueFromIndexRouteLocationState,
+  getOptionalValueFromIndexRouteLocationState,
+} from "../../utils/util";
 
 const useStyles = makeStyles({
   columnContainer: {
@@ -43,11 +48,14 @@ const useStyles = makeStyles({
 
 interface Props {
   attackInfo: AttackInformation;
+  shouldUseLocationState: boolean;
+  indexRouteLocationState?: IndexRouteLocationState;
 }
 
-const AttackTargetInput: React.FC<{ required?: boolean }> = ({
-  required = false,
-}) => {
+const AttackTargetInput: React.FC<{
+  required?: boolean;
+  defaultValue?: string;
+}> = ({ defaultValue, required = false }) => {
   const { targetInputContainer, bottomMargin, columnContainer } = useStyles();
 
   return (
@@ -63,12 +71,17 @@ const AttackTargetInput: React.FC<{ required?: boolean }> = ({
         helperText="Targeting strategy"
         options={Object.keys(TARGETED_TYPES)}
         required={required}
+        defaultValue={defaultValue}
       />
     </div>
   );
 };
 
-const AttackParametersInput: React.FC<Props> = ({ attackInfo }) => {
+const AttackParametersInput: React.FC<Props> = ({
+  attackInfo,
+  shouldUseLocationState: parentValue,
+  indexRouteLocationState,
+}) => {
   const {
     columnContainer,
     rowContainer,
@@ -76,15 +89,32 @@ const AttackParametersInput: React.FC<Props> = ({ attackInfo }) => {
     item,
     buttonContainer,
   } = useStyles();
-
+  const userHasClickedButton = useRef(false);
   const [binaryValue, setBinaryValue] = useState(true);
-  const forceUpdate = useCallback(() => setBinaryValue((s) => !s), []);
+  const forceUpdate = useCallback(() => {
+    userHasClickedButton.current = true;
+    setBinaryValue((s) => !s);
+  }, []);
+  const shouldUseLocationState = parentValue && !userHasClickedButton.current;
 
   const dropdownInputs: JSX.Element[] = [];
   const booleanInputs: JSX.Element[] = [];
   const numberInputs: JSX.Element[] = [];
 
   Object.entries(attackInfo.parameters).forEach(([label, parameter]) => {
+    let defaultValue;
+    if (shouldUseLocationState) {
+      if (parameter.type === "boolean") {
+        defaultValue = getBoolValueFromIndexRouteLocationState(
+          indexRouteLocationState!,
+          label
+        )!;
+      } else {
+        defaultValue = indexRouteLocationState![label];
+      }
+    } else {
+      defaultValue = parameter.defaultValue;
+    }
     switch (parameter.type) {
       case "dropdown":
         dropdownInputs.push(
@@ -93,7 +123,7 @@ const AttackParametersInput: React.FC<Props> = ({ attackInfo }) => {
               label={label}
               helperText={parameter.helperText}
               options={parameter.options.map((_) => _.name)}
-              defaultValue={parameter.defaultValue}
+              defaultValue={defaultValue}
               disableClearable
             />
           </div>
@@ -105,7 +135,7 @@ const AttackParametersInput: React.FC<Props> = ({ attackInfo }) => {
             <BooleanInput
               label={label}
               helperText={parameter.helperText}
-              defaultChecked={parameter.defaultValue}
+              defaultChecked={defaultValue as boolean}
             />
           </div>
         );
@@ -116,7 +146,7 @@ const AttackParametersInput: React.FC<Props> = ({ attackInfo }) => {
             <TextFieldInput
               label={label}
               helperText={parameter.helperText}
-              defaultValue={parameter.defaultValue}
+              defaultValue={defaultValue}
               inputProps={parameter.inputProps}
               type="number"
             />
@@ -130,16 +160,27 @@ const AttackParametersInput: React.FC<Props> = ({ attackInfo }) => {
     }
   });
 
+  let defaultTargetedValue;
+  if (shouldUseLocationState) {
+    defaultTargetedValue = getOptionalValueFromIndexRouteLocationState(
+      indexRouteLocationState!,
+      "Target"
+    );
+  } else {
+    defaultTargetedValue = undefined;
+  }
   let targetedInput;
   switch (attackInfo.targeted) {
     case "NO":
       targetedInput = null;
       break;
     case "YES":
-      targetedInput = <AttackTargetInput required />;
+      targetedInput = (
+        <AttackTargetInput required defaultValue={defaultTargetedValue} />
+      );
       break;
     case "BOTH":
-      targetedInput = <AttackTargetInput />;
+      targetedInput = <AttackTargetInput defaultValue={defaultTargetedValue} />;
       break;
     default: {
       const _exhaustiveCheck: never = attackInfo.targeted;
