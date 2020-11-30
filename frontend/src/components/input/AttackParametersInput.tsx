@@ -7,11 +7,7 @@ import { AttackInformation } from "../../utils/types";
 import { TARGETED_TYPES } from "../../utils/data";
 import Typography from "@material-ui/core/Typography";
 import Button from "@material-ui/core/Button";
-import { IndexRouteLocationState } from "../../utils/types";
-import {
-  getBoolValueFromIndexRouteLocationState,
-  getOptionalValueFromIndexRouteLocationState,
-} from "../../utils/util";
+import { UserInput } from "../../utils/types";
 
 const useStyles = makeStyles({
   columnContainer: {
@@ -22,8 +18,9 @@ const useStyles = makeStyles({
     marginTop: 8,
     marginBottom: 4,
   },
-  bottomMargin: {
-    marginBottom: 8,
+  targetedLabel: {
+    marginTop: 4,
+    marginBottom: 10,
   },
   rowContainer: {
     display: "flex",
@@ -41,26 +38,26 @@ const useStyles = makeStyles({
   },
   buttonContainer: {
     display: "flex",
-    marginTop: 8,
-    marginBottom: 20,
+    marginTop: 12,
+    marginBottom: 8,
   },
 });
 
 interface Props {
   attackInfo: AttackInformation;
   shouldUseLocationState: boolean;
-  indexRouteLocationState?: IndexRouteLocationState;
+  indexRouteAttack?: UserInput["attacks"][number];
 }
 
 const AttackTargetInput: React.FC<{
   required?: boolean;
   defaultValue?: string;
 }> = ({ defaultValue, required = false }) => {
-  const { targetInputContainer, bottomMargin, columnContainer } = useStyles();
+  const { targetInputContainer, targetedLabel, columnContainer } = useStyles();
 
   return (
     <div className={columnContainer}>
-      <Typography classes={{ root: bottomMargin }}>
+      <Typography classes={{ root: targetedLabel }}>
         {required
           ? "This is a targeted attack, please choose a targeting stratergy:"
           : "You may choose to run a targeted version of this attack:"}
@@ -80,7 +77,7 @@ const AttackTargetInput: React.FC<{
 const AttackParametersInput: React.FC<Props> = ({
   attackInfo,
   shouldUseLocationState: parentValue,
-  indexRouteLocationState,
+  indexRouteAttack,
 }) => {
   const {
     columnContainer,
@@ -104,14 +101,7 @@ const AttackParametersInput: React.FC<Props> = ({
   Object.entries(attackInfo.parameters).forEach(([label, parameter]) => {
     let defaultValue;
     if (shouldUseLocationState) {
-      if (parameter.type === "boolean") {
-        defaultValue = getBoolValueFromIndexRouteLocationState(
-          indexRouteLocationState!,
-          label
-        )!;
-      } else {
-        defaultValue = indexRouteLocationState![label];
-      }
+      defaultValue = indexRouteAttack!.parameters[label];
     } else {
       defaultValue = parameter.defaultValue;
     }
@@ -162,10 +152,7 @@ const AttackParametersInput: React.FC<Props> = ({
 
   let defaultTargetedValue;
   if (shouldUseLocationState) {
-    defaultTargetedValue = getOptionalValueFromIndexRouteLocationState(
-      indexRouteLocationState!,
-      "Target"
-    );
+    defaultTargetedValue = indexRouteAttack!.target ?? undefined;
   } else {
     defaultTargetedValue = undefined;
   }

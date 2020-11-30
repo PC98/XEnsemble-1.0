@@ -2,31 +2,32 @@ import React, { useCallback, useState, useRef } from "react";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import DropdownInput from "./DropdownInput";
 import AttackParametersInput from "./AttackParametersInput";
-import { IndexRouteLocationState } from "../../utils/types";
+import { UserInput } from "../../utils/types";
 import { ATTACK_OBJ, ATTACK } from "../../utils/data";
 
 const useStyles = makeStyles({
-  attackInput: {
-    width: "33%",
-    minWidth: 416,
+  container: {
+    display: "flex",
+    flexDirection: "column",
+  },
+  algorithmDropdown: {
+    display: "flex",
   },
 });
 
 interface Props {
-  indexRouteLocationState?: IndexRouteLocationState;
+  indexRouteAttack?: UserInput["attacks"][number];
 }
 
-const AttackInformationInput: React.FC<Props> = ({
-  indexRouteLocationState,
-}) => {
-  const { attackInput } = useStyles();
+const AttackInformationInput: React.FC<Props> = ({ indexRouteAttack }) => {
+  const { container, algorithmDropdown } = useStyles();
 
   const shouldUseLocationStateForAttackParameters = useRef(
-    indexRouteLocationState != null
+    indexRouteAttack != null
   );
 
   const [selectedAttack, setSelectedAttack] = useState(
-    indexRouteLocationState?.Attack as ATTACK | undefined
+    indexRouteAttack?.algorithm as ATTACK | undefined
   );
 
   const onAttackSelect = useCallback((value: string | null) => {
@@ -36,27 +37,28 @@ const AttackInformationInput: React.FC<Props> = ({
   }, []);
 
   return (
-    <>
-      <div className={attackInput}>
+    <div className={container}>
+      <div className={algorithmDropdown}>
         <DropdownInput
           label="Attack"
-          fullWidth
-          helperText="Choose the attack algorithm to run."
+          helperText={`Choose the attack algorithm to run.${"\u00a0".repeat(
+            30
+          )}`}
           options={Object.keys(ATTACK_OBJ)}
           onValueSelect={onAttackSelect}
-          defaultValue={indexRouteLocationState?.Attack}
+          defaultValue={indexRouteAttack?.algorithm}
         />
       </div>
       {selectedAttack != null && (
         <AttackParametersInput
           attackInfo={ATTACK_OBJ[selectedAttack]}
-          indexRouteLocationState={indexRouteLocationState}
+          indexRouteAttack={indexRouteAttack}
           shouldUseLocationState={
             shouldUseLocationStateForAttackParameters.current
           }
         />
       )}
-    </>
+    </div>
   );
 };
 

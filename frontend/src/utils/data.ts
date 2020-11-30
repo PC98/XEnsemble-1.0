@@ -16,6 +16,7 @@ export const TARGETED_TYPES = {
   "Least likely": "ll",
   Next: "next",
 } as const;
+export type TARGET_TYPE = keyof typeof TARGETED_TYPES;
 
 const EPSILON = (defaultValue = 0.1) => ({
   value: "eps",

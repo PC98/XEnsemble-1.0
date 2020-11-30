@@ -1,17 +1,20 @@
 import { useState, useCallback } from "react";
 
-import { ServerResponse } from "./types";
+import { ServerResponse, UserInput } from "./types";
 
 const usePostRequest = () => {
   const [isLoading, setIsLoading] = useState(false);
 
-  const makeRequest = useCallback(async (body: FormData) => {
+  const makeRequest = useCallback(async (body: UserInput) => {
     try {
       setIsLoading(true);
 
       const response = await fetch("/api/form", {
         method: "POST",
-        body,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify(body),
       });
 
       if (!response.ok) {

@@ -1,6 +1,6 @@
 from flask import Flask, request
 import subprocess
-import json
+import random
 import os
 import base64
 import csv
@@ -24,20 +24,18 @@ def parse_float_data(data: str):
     return float_val
 
 
-@app.route('/api/form', methods=['POST'])
-def api_form():
-    form_input = request.form.to_dict()
-    rc = subprocess.run(['python', 'main_attack_portal_2.py', "--dataset_name", form_input['Dataset'],
-                         f"--label_index={form_input['Label']}", f"--random_image={form_input['Random']}", "--model_name", form_input['Model'],
-                         f"--nb_examples={form_input['Number']}", "--attacks", form_input["Attack"]])  # To hide output, add stdout=subprocess.DEVNULL
+def process_one_attack(form_input, random_flag, attack):
+    rc = subprocess.run(['python', 'main_attack_portal_2.py', "--dataset_name", form_input['dataset'],
+                         f"--label_index={form_input['classLabelValue']}", f"--random_image={random_flag}", "--model_name", form_input['modelValue'],
+                         f"--nb_examples={form_input['number']}", "--attacks", attack])  # To hide output, add stdout=subprocess.DEVNULL
 
     if rc.returncode != 0:
-        return {'success': False}
+        return None
 
     # Model value comes from front-end and is already in lower-case
-    task_id = f"{form_input['Dataset']}_{form_input['Model']}"
+    task_id = f"{form_input['dataset']}_{form_input['modelValue']}"
     results_dir = os.path.join(RESULTS_DIR, task_id)
-    nb_examples = int(form_input["Number"])
+    nb_examples = int(form_input["number"])
     images = []
     for i in range(nb_examples):
         original_img = encoded_img(
@@ -82,7 +80,29 @@ def api_form():
         assert len(eval_dict["prediction_after_attack"]
                    ) == nb_examples
 
-        return {'success': True, 'images': images, 'evaluation': eval_dict, 'user_input': json.loads(form_input['user_input'])}
+        return images, eval_dict
+
+
+@app.route('/api/form', methods=['POST'])
+def api_form():
+    form_input = request.json
+    if form_input['random']:
+        # Choose any random number
+        random_flag = random.randint(0, 100)
+    else:
+        random_flag = 0
+    attacks = form_input["attackStr"].split(";")
+
+    results = []
+    for attack in attacks:
+        attack_result = process_one_attack(form_input, random_flag, attack)
+        if attack_result is None:
+            return {'success': False}
+
+        results.append(
+            {'images': attack_result[0], 'evaluation': attack_result[1]})
+
+    return {'success': True, 'results': results, 'user_input': form_input}
 
 
 if __name__ == '__main__':

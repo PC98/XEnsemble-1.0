@@ -1,38 +1,33 @@
 import React from "react";
 import makeStyles from "@material-ui/core/styles/makeStyles";
-import Typography from "@material-ui/core/Typography";
 import Table from "@material-ui/core/Table";
 import TableBody from "@material-ui/core/TableBody";
 import TableCell from "@material-ui/core/TableCell";
-import TableContainer from "@material-ui/core/TableContainer";
 import TableRow from "@material-ui/core/TableRow";
-import Paper from "@material-ui/core/Paper";
+import TableHead from "@material-ui/core/TableHead";
 import { ATTACK_OBJ, ATTACK } from "../../utils/data";
-import { TableData, IndexRouteLocationState } from "../../utils/types";
-import {
-  getBoolValueFromIndexRouteLocationState,
-  getOptionalValueFromIndexRouteLocationState,
-} from "../../utils/util";
+import { TableData, UserInput } from "../../utils/types";
 
 interface Props {
-  user_input: IndexRouteLocationState;
+  userInputAttack: UserInput["attacks"][number];
+  position: number;
 }
 
 const useStyles = makeStyles({
-  container: {
-    display: "flex",
-    flex: 1,
-    flexDirection: "column",
-  },
-  tableContainer: {
-    marginTop: 16,
+  unsetBottomBorder: {
+    "& > *": {
+      borderBottom: "unset",
+    },
   },
 });
 
-const AttackInformationTable: React.FC<Props> = ({ user_input }) => {
-  const { container, tableContainer } = useStyles();
-  const attackAlgo = user_input.Attack as ATTACK;
-  const attackInfo = ATTACK_OBJ[attackAlgo];
+const AttackInformationTable: React.FC<Props> = ({
+  userInputAttack,
+  position,
+}) => {
+  const { unsetBottomBorder } = useStyles();
+
+  const attackInfo = ATTACK_OBJ[userInputAttack.algorithm as ATTACK];
 
   const dropdownParameters: TableData[] = [];
   const booleanParameters: TableData[] = [];
@@ -41,18 +36,24 @@ const AttackInformationTable: React.FC<Props> = ({ user_input }) => {
   Object.entries(attackInfo.parameters).forEach(([label, parameter]) => {
     switch (parameter.type) {
       case "dropdown":
-        dropdownParameters.push({ head: label, body: user_input[label] });
+        dropdownParameters.push({
+          head: label,
+          body: userInputAttack.parameters[label] as string,
+        });
         break;
       case "boolean":
         booleanParameters.push({
           head: label,
-          body: getBoolValueFromIndexRouteLocationState(user_input, label)!
+          body: (userInputAttack.parameters[label] as boolean)
             ? "True"
             : "False",
         });
         break;
       case "number":
-        numberParameters.push({ head: label, body: user_input[label] });
+        numberParameters.push({
+          head: label,
+          body: userInputAttack.parameters[label] as string,
+        });
         break;
       default: {
         const _exhaustiveCheck: never = parameter;
@@ -69,18 +70,13 @@ const AttackInformationTable: React.FC<Props> = ({ user_input }) => {
     case "YES":
       targetedParameter = {
         head: "Targeted",
-        body: getOptionalValueFromIndexRouteLocationState(
-          user_input,
-          "Target"
-        )!,
+        body: userInputAttack.target!,
       };
       break;
     case "BOTH":
       targetedParameter = {
         head: "Targeted",
-        body:
-          getOptionalValueFromIndexRouteLocationState(user_input, "Target") ??
-          "No",
+        body: userInputAttack.target ?? "No",
       };
       break;
     default: {
@@ -89,34 +85,39 @@ const AttackInformationTable: React.FC<Props> = ({ user_input }) => {
     }
   }
 
+  const createTableCells = (key: keyof TableData) =>
+    [
+      ...numberParameters,
+      ...dropdownParameters,
+      ...booleanParameters,
+      targetedParameter,
+    ].map(
+      (param, index) =>
+        param && (
+          <TableCell
+            key={`${index}_${param[key]}_${position}`}
+            align={index < numberParameters.length ? "right" : "left"}
+          >
+            {param[key]}
+          </TableCell>
+        )
+    );
+
   return (
-    <div className={container}>
-      <Typography variant="h5">Attack Information</Typography>
-      <TableContainer classes={{ root: tableContainer }} component={Paper}>
-        <Table>
-          <TableBody>
-            <TableRow>
-              <TableCell variant="head">Algorithm</TableCell>
-              <TableCell>{attackAlgo}</TableCell>
-            </TableRow>
-            {[
-              ...numberParameters,
-              ...dropdownParameters,
-              ...booleanParameters,
-              targetedParameter,
-            ].map(
-              (param) =>
-                param && (
-                  <TableRow key={param.head}>
-                    <TableCell variant="head">{param.head}</TableCell>
-                    <TableCell>{param.body}</TableCell>
-                  </TableRow>
-                )
-            )}
-          </TableBody>
-        </Table>
-      </TableContainer>
-    </div>
+    <Table size="small">
+      <TableHead>
+        <TableRow>
+          <TableCell>Algorithm</TableCell>
+          {createTableCells("head")}
+        </TableRow>
+      </TableHead>
+      <TableBody>
+        <TableRow className={unsetBottomBorder}>
+          <TableCell>{userInputAttack.algorithm}</TableCell>
+          {createTableCells("body")}
+        </TableRow>
+      </TableBody>
+    </Table>
   );
 };
 

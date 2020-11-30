@@ -1,18 +1,3 @@
-import { IndexRouteLocationState } from "./types";
-
-export const getBoolValueFromIndexRouteLocationState = (
-  state: IndexRouteLocationState | undefined,
-  key: string
-) => (state == null ? undefined : state[key] == null ? false : true);
-
-export const getOptionalValueFromIndexRouteLocationState = (
-  state: IndexRouteLocationState | undefined,
-  key: string
-) =>
-  state == null || state[key] == null || state[key] === ""
-    ? undefined
-    : state[key];
-
 export const toDecimalPlacesOrNaN = (num: number | null, isPercent = false) => {
   if (num == null) {
     return "NaN";
@@ -28,4 +13,22 @@ export const toDecimalPlacesOrNaN = (num: number | null, isPercent = false) => {
     return `${parseFloat(mantissa).toFixed(2)}e${exponent}`;
   }
   return toReturn;
+};
+
+// See values used in BooleanInput.tsx
+export const processBooleanInputValues = (values: string[]) => {
+  // const userInput = {}
+  if (values.length < 2) {
+    return false;
+  }
+  return values[0] === "true" && values[1] === "false";
+};
+
+export const formDataSetArray = (
+  data: FormData,
+  label: string,
+  arr: string[]
+) => {
+  data.delete(label);
+  arr.forEach((val) => void data.append(label, val));
 };

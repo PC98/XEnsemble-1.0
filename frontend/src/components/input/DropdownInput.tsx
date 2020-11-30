@@ -12,7 +12,6 @@ type Props = React.ComponentProps<typeof TextFieldInput> & {
 const DropdownInput: React.FC<Props> = ({
   options,
   defaultValue,
-  fullWidth,
   onValueSelect,
   disableClearable,
   shouldSortOptions = false,
@@ -25,7 +24,6 @@ const DropdownInput: React.FC<Props> = ({
       onChange={(_, value) => {
         onValueSelect && onValueSelect(value as string | null);
       }}
-      fullWidth={fullWidth}
       defaultValue={defaultValue}
       options={shouldSortOptions ? [...options].sort() : options}
       renderInput={(params) => <TextFieldInput {...params} {...rest} />}

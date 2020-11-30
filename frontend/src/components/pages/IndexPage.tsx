@@ -6,7 +6,11 @@ import NavigationTabBar from "../NavigationTabBar";
 import makeStyles from "@material-ui/core/styles/makeStyles";
 import usePostRequest from "../../utils/usePostRequest";
 import { useHistory } from "react-router-dom";
-import { ServerResponse, IndexRouteLocationState } from "../../utils/types";
+import {
+  ServerResponse,
+  UserInput,
+  UserInputAttackParameters,
+} from "../../utils/types";
 import {
   DATASET_OBJ,
   DATASET,
@@ -15,7 +19,9 @@ import {
   ATTACK,
   MODEL,
   TARGETED_TYPES,
+  TARGET_TYPE,
 } from "../../utils/data";
+import { processBooleanInputValues, formDataSetArray } from "../../utils/util";
 
 const useStyles = makeStyles({
   container: {
@@ -28,7 +34,7 @@ const useStyles = makeStyles({
 export type RouteProps = RouteComponentProps<
   {},
   StaticContext,
-  IndexRouteLocationState | undefined
+  UserInput | undefined
 >;
 
 interface Props extends RouteProps {
@@ -43,7 +49,7 @@ const IndexPage: React.FC<Props> = ({
   const formRef = useRef<HTMLFormElement>(null);
   const indexRouteLocationState = routeProps.location.state;
   const [tabValue, setTabValue] = useState<DATASET>(
-    (indexRouteLocationState?.Dataset ?? "MNIST") as DATASET
+    (indexRouteLocationState?.dataset ?? "MNIST") as DATASET
   );
   const { container } = useStyles();
 
@@ -53,62 +59,101 @@ const IndexPage: React.FC<Props> = ({
     async (e: React.FormEvent<HTMLFormElement>) => {
       e.preventDefault();
       const data = new FormData(formRef.current ?? undefined);
-      // Before processing anything, save user's input so that it can re-used later
-      data.set("Dataset", tabValue);
-      const userInput = Object.fromEntries(data.entries());
-      data.set("user_input", JSON.stringify(userInput));
+      let userInput = {} as UserInput;
 
-      // Use labels from InputForm.tsx
-      const labelStr = data.get("Label") as string;
+      userInput["dataset"] = tabValue;
+
       const modelStr = data.get("Model") as MODEL;
-      const randomVal = data.get("Random") as string | null;
-      const attackType = data.get("Attack") as ATTACK;
+      userInput["model"] = modelStr;
+      userInput["modelValue"] = MODEL_OBJ[modelStr];
 
-      data.set("Label", String(DATASET_OBJ[tabValue].labels.indexOf(labelStr))); // To make things easier for the back-end
-      data.set("Model", MODEL_OBJ[modelStr]);
-      data.set("Random", String(randomVal == null ? 0 : 1)); // Random behaves a bit differently when compared to other boolean parameters
-      // Now, build the attack string:
-      const { value: attackKey, parameters } = ATTACK_OBJ[attackType];
-      const attackParameters: string[] = [];
-      Object.entries(parameters).forEach(([label, parameter]) => {
-        const key = parameter.value; // like "eps_iter"
-        const inputValue = data.get(label) as string | null;
-        let parsedValue;
-        switch (parameter.type) {
-          case "dropdown":
-            parsedValue = parameter.options.find((_) => _.name === inputValue)
-              ?.value;
-            break;
-          case "boolean":
-            parsedValue = inputValue == null ? "false" : "true";
-            break;
-          case "number":
-            parsedValue = inputValue;
-            break;
-          default: {
-            const _exhaustiveCheck: never = parameter;
-            return _exhaustiveCheck;
+      const labelStr = data.get("Label") as string;
+      userInput["classLabel"] = labelStr;
+      userInput["classLabelValue"] = DATASET_OBJ[tabValue].labels.indexOf(
+        labelStr
+      ); // To make things easier for the back-end
+
+      const randomVal = data.getAll("Random") as string[];
+      userInput["random"] = processBooleanInputValues(randomVal);
+
+      const numberStr = data.get("Number") as string;
+      userInput["number"] = parseInt(numberStr);
+
+      const attackAlgos = data.getAll("Attack") as ATTACK[];
+      userInput["attacks"] = [];
+      const attackStringArr: string[] = [];
+
+      attackAlgos.forEach((algo) => {
+        const userInputAttackParams: UserInputAttackParameters = {};
+        const attackParameters: string[] = [];
+        const { value: attackKey, parameters, targeted } = ATTACK_OBJ[algo];
+
+        Object.entries(parameters).forEach(([label, parameter]) => {
+          const key = parameter.value; // key: "eps_iter"
+          const inputValues = data.getAll(label) as string[]; // label: "Epsilon iteration"
+          const curValue = inputValues.splice(0, 1)[0];
+
+          let parsedValue;
+          switch (parameter.type) {
+            case "dropdown":
+              parsedValue = parameter.options.find((_) => _.name === curValue)!
+                .value;
+              userInputAttackParams[label] = curValue;
+              break;
+            case "boolean":
+              parsedValue = processBooleanInputValues([
+                curValue,
+                inputValues[0],
+              ]);
+              if (parsedValue) {
+                inputValues.splice(0, 1);
+              }
+              userInputAttackParams[label] = parsedValue;
+              break;
+            case "number":
+              parsedValue = curValue;
+              userInputAttackParams[label] = curValue;
+              break;
+            default: {
+              const _exhaustiveCheck: never = parameter;
+              return _exhaustiveCheck;
+            }
           }
+
+          attackParameters.push(`${key}=${parsedValue}`);
+          formDataSetArray(data, label, inputValues);
+        });
+
+        let userInputTarget = null;
+        if (targeted === "YES" || targeted === "BOTH") {
+          const tagetValues = data.getAll("Target") as string[];
+          const curTarget = tagetValues.splice(0, 1)[0];
+
+          if (curTarget in TARGETED_TYPES) {
+            attackParameters.push(
+              `targeted=${TARGETED_TYPES[curTarget as TARGET_TYPE]}`
+            );
+            userInputTarget = curTarget;
+          }
+
+          formDataSetArray(data, "Target", tagetValues);
         }
 
-        attackParameters.push(`${key}=${parsedValue}`);
-        data.delete(label); // optional
+        userInput["attacks"].push({
+          algorithm: algo,
+          parameters: userInputAttackParams,
+          target: userInputTarget,
+        });
+
+        if (attackParameters.length > 0) {
+          attackStringArr.push(`${attackKey}?${attackParameters.join("&")}`);
+        } else {
+          attackStringArr.push(`${attackKey}`);
+        }
       });
+      userInput["attackStr"] = attackStringArr.join(";");
 
-      const target = data.get("Target") as string | null;
-      if (target != null && target in TARGETED_TYPES) {
-        // @ts-ignore
-        attackParameters.push(`targeted=${TARGETED_TYPES[target]}`);
-        data.delete("Target");
-      }
-
-      if (attackParameters.length > 0) {
-        data.set("Attack", `${attackKey}?${attackParameters.join("&")}`);
-      } else {
-        data.set("Attack", attackKey);
-      }
-
-      serverResponseCallback(await makeRequest(data));
+      serverResponseCallback(await makeRequest(userInput));
     },
     [makeRequest, serverResponseCallback, tabValue]
   );
