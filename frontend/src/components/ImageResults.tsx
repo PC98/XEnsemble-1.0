@@ -6,10 +6,13 @@ import Tab from "@material-ui/core/Tab";
 import Typography from "@material-ui/core/Typography";
 import Paper from "@material-ui/core/Paper";
 import ImageResultsTable from "./tables/ImageResultsTable";
-import { AttackResult } from "../utils/types";
+import { AttackResult, UserInput } from "../utils/types";
+import { ATTACK } from "../utils/data";
+import { getAttackAlgoStr } from "../utils/util";
 
 interface Props {
   allImages: AttackResult["images"][];
+  allAttackAlgos: UserInput["attacks"][number]["algorithm"][];
   originalImageLabel: string;
   allAdversarialImageLabels: string[][];
   className: string;
@@ -19,7 +22,6 @@ interface Props {
 const useStyles = makeStyles({
   container: {
     display: "flex",
-    flex: 1,
     flexDirection: "column",
   },
   tabContainer: {
@@ -31,6 +33,7 @@ const useStyles = makeStyles({
 
 const ImageResults: React.FC<Props> = ({
   allImages,
+  allAttackAlgos,
   className,
   originalImageLabel,
   allAdversarialImageLabels,
@@ -51,7 +54,13 @@ const ImageResults: React.FC<Props> = ({
           onChange={(_, newTabIndex) => void setTabIndex(newTabIndex)}
         >
           {allImages.map((_, index) => (
-            <Tab label={`Attack ${index + 1}`} key={index} value={index} />
+            <Tab
+              label={`Attack ${index + 1}: ${getAttackAlgoStr(
+                allAttackAlgos[index] as ATTACK
+              )}`}
+              key={index}
+              value={index}
+            />
           ))}
         </Tabs>
       </Paper>

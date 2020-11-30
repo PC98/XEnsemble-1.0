@@ -23,7 +23,7 @@ interface Props {
 
 const AttackInputList: React.FC<Props> = ({ indexRouteLocationState }) => {
   const { container, iconContainer } = useStyles();
-  // const [numAttacks, setNumOfAttacks] = useState(1);
+
   const [items, setItems] = useState(
     Array.from(Array(indexRouteLocationState?.attacks.length ?? 1).keys())
   );

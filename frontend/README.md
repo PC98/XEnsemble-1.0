@@ -27,7 +27,7 @@ This will run the Flask server and the front-end code. To use the web-app, navig
 ## Features and Limitations
 
 - The `server.py` file in the root directory of this repository is used as a simple server. The server executes `main_attack_portal_2.py`, which builds on top of `main_attack_portal.py` to generate results as expected by the GUI.
-- The web-app runs one attack on one image at a time. Future work could enable support for running multiple attacks and taking input for attack parameters using autocomplete dropdowns.
+- The web-app can run multiple attacks on several instances of images with the same label. It also features a friendly UI to enter attack parameters.
 - The codebase has not been configured for deployment or production mode yet.
 - Front-end does not support the LFW dataset.
-- `discretization` and `success_rate` evaluation metrics are not displayed since `discretization` is always `True` and `success_rate` can be inferred from the result of the single attacked image.
+- The `discretization` metric is not displayed since it is always `True`.

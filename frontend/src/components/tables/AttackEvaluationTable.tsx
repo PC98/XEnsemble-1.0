@@ -22,7 +22,6 @@ interface Props {
 const useStyles = makeStyles({
   container: {
     display: "flex",
-    flex: 1,
     flexDirection: "column",
   },
   tableContainer: {

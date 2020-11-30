@@ -1,3 +1,5 @@
+import { ATTACK_OBJ, ATTACK } from "./data";
+
 export const toDecimalPlacesOrNaN = (num: number | null, isPercent = false) => {
   if (num == null) {
     return "NaN";
@@ -31,4 +33,8 @@ export const formDataSetArray = (
 ) => {
   data.delete(label);
   arr.forEach((val) => void data.append(label, val));
+};
+
+export const getAttackAlgoStr = (attack: ATTACK) => {
+  return ATTACK_OBJ[attack].value.toUpperCase();
 };

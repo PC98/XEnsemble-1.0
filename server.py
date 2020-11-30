@@ -87,8 +87,8 @@ def process_one_attack(form_input, random_flag, attack):
 def api_form():
     form_input = request.json
     if form_input['random']:
-        # Choose any random number
-        random_flag = random.randint(0, 100)
+        # Choose any random number, except 0
+        random_flag = random.randint(1, 100)
     else:
         random_flag = 0
     attacks = form_input["attackStr"].split(";")

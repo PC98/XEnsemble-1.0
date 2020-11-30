@@ -10,7 +10,8 @@ import KeyboardArrowUpIcon from "@material-ui/icons/KeyboardArrowUp";
 import IconButton from "@material-ui/core/IconButton";
 import AttackInformationTable from "./AttackInformationTable";
 import { UserInput, AttackResult } from "../../utils/types";
-import { toDecimalPlacesOrNaN } from "../../utils/util";
+import { toDecimalPlacesOrNaN, getAttackAlgoStr } from "../../utils/util";
+import { ATTACK } from "../../utils/data";
 
 interface Props {
   userInputAttack: UserInput["attacks"][number];
@@ -51,7 +52,9 @@ const AttackEvaluationTableRow: React.FC<Props> = ({
           </IconButton>
         </TableCell>
         <TableCell component="th" scope="row">
-          {`Attack ${position}`}
+          {`Attack ${position}: ${getAttackAlgoStr(
+            userInputAttack.algorithm as ATTACK
+          )}`}
         </TableCell>
         <TableCell align="right">
           {toDecimalPlacesOrNaN(success_rate, true)}

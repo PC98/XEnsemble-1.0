@@ -68,6 +68,7 @@ const ResultPage: React.FC<Props> = ({ serverResponse }) => {
           className={item}
           allImages={allImages}
           originalImageLabel={user_input.classLabel}
+          allAttackAlgos={user_input.attacks.map((_) => _.algorithm)}
           allAdversarialImageLabels={allEvaluations.map((ev) =>
             ev.prediction_after_attack.map((p) => labels[p])
           )}
