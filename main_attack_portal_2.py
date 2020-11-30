@@ -291,7 +291,10 @@ def main(argv=None):
             if pred == FLAGS.label_index:
                 confidence_scores += str(float("nan")) + ","
             else:
-                confidence_scores += str(confidences[k]) + ","
+                try:
+                    confidence_scores += str(confidences[k]) + ","
+                except:
+                    confidence_scores += str(float("nan")) + ","
                 k += 1
         rec['confidence_scores'] = confidence_scores.rstrip(",")
         rec['dataset_name'] = FLAGS.dataset_name
