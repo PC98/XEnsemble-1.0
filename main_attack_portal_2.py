@@ -280,12 +280,13 @@ def main(argv=None):
         Y_test_adv_discret_pred = model.predict(X_test_adv_discret)
         Y_test_adv_discretized_pred_list.append(Y_test_adv_discret_pred)
 
-        rec = evaluate_adversarial_examples2(X_test, Y_test, X_test_adv_discret, Y_test_target.copy(), targeted, Y_test_adv_discret_pred)
+        rec = evaluate_adversarial_examples2(X_test, Y_test, X_test_adv_discret, Y_test_target.copy(), targeted, Y_test_adv_discret_pred, attack_string)
         confidences = rec['confidence_scores']
         preds = np.argmax(Y_test_adv_discret_pred,axis=1)
         k = 0
         confidence_scores = ""
         preds_after_attack = ""
+        mean = 0
         for pred in preds:
             preds_after_attack += str(pred) + ","
             if pred == FLAGS.label_index:
@@ -293,9 +294,11 @@ def main(argv=None):
             else:
                 try:
                     confidence_scores += str(confidences[k]) + ","
+                    mean += float(confidences[k])
                 except:
                     confidence_scores += str(float("nan")) + ","
                 k += 1
+        mean /= len(preds)
         rec['confidence_scores'] = confidence_scores.rstrip(",")
         rec['dataset_name'] = FLAGS.dataset_name
         rec['model_name'] = FLAGS.model_name
@@ -306,6 +309,7 @@ def main(argv=None):
         rec['discretization'] = True
         rec['prediction_after_attack'] = preds_after_attack.rstrip(",")
         rec['number_of_images'] = FLAGS.nb_examples
+        rec['mean_confidence'] = mean
         to_csv.append(rec)
 
     from utils.output import write_to_csv

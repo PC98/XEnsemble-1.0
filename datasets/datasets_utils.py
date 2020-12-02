@@ -108,21 +108,20 @@ def calculate_mean_confidence(Y_pred, Y_target):
 
     return mean_confidence
 
-def calculate_mean_confidence2(Y_pred, Y_target):
+def calculate_mean_confidence2(Y_pred, Y_target, attack_string):
     """
     Calculate the mean confidence on target classes.
     :param Y_pred: softmax output
     :param Y_target: target classes in shape (#samples, #classes)
     :return: the mean confidence.
     """
-    assert len(Y_pred) == len(Y_target)
-    confidence = np.multiply(Y_pred, Y_target)
-    print("LEN",len(confidence))
-    confidence = np.max(confidence, axis=1)
-    print("lolwhat", len(confidence))
-
+    if 'targeted=' in attack_string:
+        assert len(Y_pred) == len(Y_target)
+        confidence = np.multiply(Y_pred, Y_target)
+        confidence = np.max(confidence, axis=1)
+    else:
+        confidence = np.max(Y_pred, axis=1)
     mean_confidence = np.mean(confidence)
-
     return mean_confidence, confidence
 
 
@@ -186,7 +185,7 @@ def evaluate_adversarial_examples(X_test, Y_test, X_test_adv, Y_test_target, tar
 
     return rec
 
-def evaluate_adversarial_examples2(X_test, Y_test, X_test_adv, Y_test_target, targeted, Y_test_adv_pred):
+def evaluate_adversarial_examples2(X_test, Y_test, X_test_adv, Y_test_target, targeted, Y_test_adv_pred, attack_string):
     success_rate = calculate_accuracy(Y_test_adv_pred, Y_test_target)
     success_idx = get_match_pred_vec(Y_test_adv_pred, Y_test_target)
 
@@ -195,7 +194,7 @@ def evaluate_adversarial_examples2(X_test, Y_test, X_test_adv, Y_test_target, ta
         success_idx = np.logical_not(success_idx)
 
     # Calculate the mean confidence of the successful adversarial examples.
-    mean_conf, confs = calculate_mean_confidence2(Y_test_adv_pred[success_idx], Y_test_target[success_idx])
+    mean_conf, confs = calculate_mean_confidence2(Y_test_adv_pred[success_idx], Y_test_target[success_idx], attack_string)
     if targeted is False:
         mean_conf = 1 - mean_conf
 
